@@ -204,7 +204,7 @@ func TestRenderAndLines(t *testing.T) {
 	buf.Reset()
 	render(state, out, 20, 90)
 	_ = out.Flush()
-	if !strings.Contains(buf.String(), "Search:") {
+	if !strings.Contains(buf.String(), "[Search]") {
 		t.Fatalf("expected search line")
 	}
 

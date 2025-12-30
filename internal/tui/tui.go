@@ -405,15 +405,15 @@ type layout struct {
 
 func buildLayout(state *appState, rows, cols int) layout {
 	layout := layout{rows: rows, cols: cols}
-	layout.statusRow = rows - 2
-	layout.searchRow = rows - 1
+	layout.searchRow = rows - 2
+	layout.statusRow = rows - 1
 	layout.hintsRow = rows
-	if layout.statusRow < 2 {
+	if layout.searchRow < 2 {
 		return layout
 	}
 
 	layout.contentTop = 2
-	layout.contentBottom = layout.statusRow - 1
+	layout.contentBottom = layout.searchRow - 1
 	if layout.contentBottom < layout.contentTop {
 		return layout
 	}
@@ -546,11 +546,13 @@ func drawStatus(out *bufio.Writer, state *appState, layout layout) {
 	logoRows := 1
 	statusWidth := layout.cols
 	if showGiphyAttribution {
-		status += " · Powered by GIPHY"
 		statusWidth = maxInt(0, layout.cols-(logoCols+1))
 	}
-	status = styleIf(state.useColor, status, "\x1b[90m")
-	writeLineAt(out, layout.statusRow, 1, status, statusWidth)
+	line := formatStatusLine(state.useColor, status)
+	if showGiphyAttribution {
+		line += styleIf(state.useColor, " · Powered by GIPHY", "\x1b[90m")
+	}
+	writeLineAt(out, layout.statusRow, 1, line, statusWidth)
 	if showGiphyAttribution && layout.cols >= logoCols {
 		moveCursor(out, layout.statusRow, maxInt(1, layout.cols-logoCols+1))
 		kitty.SendFrame(out, giphyAttributionImageID, gifdecode.Frame{PNG: assets.GiphyIcon32PNG()}, logoCols, logoRows)
@@ -561,14 +563,35 @@ func drawStatus(out *bufio.Writer, state *appState, layout layout) {
 	}
 }
 
-func drawSearch(out *bufio.Writer, state *appState, layout layout) {
-	var searchLabel string
-	if state.mode == modeQuery {
-		searchLabel = styleIf(state.useColor, "Search: ", "\x1b[1m", "\x1b[33m")
-	} else {
-		searchLabel = styleIf(state.useColor, "Search: ", "\x1b[90m")
+func formatStatusLine(useColor bool, status string) string {
+	if !useColor {
+		return status
 	}
-	searchLine := searchLabel + state.query
+	i := 0
+	for i < len(status) && status[i] >= '0' && status[i] <= '9' {
+		i++
+	}
+	if i > 0 && strings.HasPrefix(status[i:], " results") {
+		num := status[:i]
+		rest := status[i:]
+		return styleIf(true, num, "\x1b[1m", "\x1b[36m") + styleIf(true, rest, "\x1b[90m")
+	}
+	return styleIf(true, status, "\x1b[90m")
+}
+
+func drawSearch(out *bufio.Writer, state *appState, layout layout) {
+	pill := "[Search]"
+	query := state.query
+	if state.useColor {
+		bg := "\x1b[48;5;236m"
+		if state.mode == modeQuery {
+			pill = styleIf(true, " Search ", bg, "\x1b[1m", "\x1b[33m")
+			query += styleIf(true, "▍", "\x1b[36m")
+		} else {
+			pill = styleIf(true, " Search ", bg, "\x1b[90m")
+		}
+	}
+	searchLine := pill + " " + query
 	writeLineAt(out, layout.searchRow, 1, searchLine, layout.cols)
 }
 
@@ -579,7 +602,15 @@ func drawHints(out *bufio.Writer, state *appState, layout layout) {
 	hints = strings.ReplaceAll(hints, "↑↓", styleIf(state.useColor, "↑↓", "\x1b[1m", "\x1b[36m"))
 	hints = strings.ReplaceAll(hints, "d", styleIf(state.useColor, "d", "\x1b[1m", "\x1b[36m"))
 	hints = strings.ReplaceAll(hints, "q", styleIf(state.useColor, "q", "\x1b[1m", "\x1b[36m"))
-	writeLineAt(out, layout.hintsRow, 1, hints, layout.cols)
+	hintsOffset := 0
+	hintsWidth := layout.cols
+	if layout.showRight && layout.listCol > 1 {
+		hintsOffset = layout.listCol - 1
+		hintsWidth = layout.listWidth
+	}
+	pad := maxInt(0, (hintsWidth-visibleRuneLen(hints))/2)
+	line := strings.Repeat(" ", hintsOffset+pad) + hints
+	writeLineAt(out, layout.hintsRow, 1, line, layout.cols)
 }
 
 func clearUnused(out *bufio.Writer, layout layout) {
