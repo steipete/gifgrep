@@ -24,15 +24,19 @@ const (
 
 var regularTaglines = []string{
 	taglineDefault,
+	"Zero context, maximum reaction.",
+	"Search. Select. Send. Regret nothing.",
+	"Your command line, now with subtext.",
+	"The fastest way to say “same”.",
+	"Terminal GIFs: because meetings have feelings.",
+	"Pipes welcome. Vibes optional.",
+	"When words fail, grep harder.",
+	"Search like you mean it: bytes, vibes, boom.",
 	"Animated reactions, zero tab clutter.",
 	"Your terminal’s GIF aisle. No checkout lines.",
 	"Arrow keys in, serotonin out.",
 	"Find the bit. Drop the mic. Paste the GIF.",
 	"Less scrolling, more scene-stealing.",
-	"Preview in Kitty. Flex responsibly.",
-	"Pipes welcome. Vibes optional.",
-	"When words fail, grep harder.",
-	"Search like you mean it: bytes, vibes, boom.",
 }
 
 var holidayTaglines = []string{

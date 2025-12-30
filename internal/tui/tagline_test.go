@@ -9,8 +9,13 @@ func TestPickTagline_OverrideIndexModulo(t *testing.T) {
 	env := map[string]string{envTaglineIndex: "999"}
 	getenv := func(key string) string { return env[key] }
 	got := pickTagline(time.Date(2025, time.December, 26, 0, 0, 0, 0, time.UTC), getenv, func() float64 { return 0 })
-	if got != taglineChristmas {
-		t.Fatalf("expected modulo to land on christmas tagline, got %q", got)
+	all := allTaglines()
+	if len(all) == 0 {
+		t.Fatalf("expected taglines")
+	}
+	want := all[999%len(all)]
+	if got != want {
+		t.Fatalf("expected modulo to land on %q, got %q", want, got)
 	}
 }
 
