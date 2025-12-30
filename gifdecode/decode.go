@@ -7,7 +7,7 @@ import (
 	"image/color"
 	"image/draw"
 	"image/gif"
-	_ "image/jpeg"
+	_ "image/jpeg" // allow image.Decode fallback for stills
 	"image/png"
 	"io"
 	"sync"

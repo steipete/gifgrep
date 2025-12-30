@@ -26,7 +26,7 @@ func TestRunTUIWithNoRestore(t *testing.T) {
 		Out:        io.Discard,
 		FD:         1,
 		IsTerminal: func(int) bool { return true },
-		MakeRaw:    func(int) (*term.State, error) { return nil, nil },
+		MakeRaw:    func(int) (*term.State, error) { return &term.State{}, nil },
 		GetSize:    func(int) (int, int, error) { return 80, 24, nil },
 		SignalCh:   make(chan os.Signal),
 	}
@@ -69,7 +69,7 @@ func TestRunTUIWithSizeError(t *testing.T) {
 
 type emptyTenorTransport struct{}
 
-func (t *emptyTenorTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *emptyTenorTransport) RoundTrip(_ *http.Request) (*http.Response, error) {
 	body := `{"results":[]}`
 	return &http.Response{
 		StatusCode: 200,

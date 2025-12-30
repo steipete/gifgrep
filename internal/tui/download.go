@@ -149,7 +149,8 @@ func sanitizeFilename(name string) string {
 
 func uniqueFilePath(dir, filename string) (string, error) {
 	path := filepath.Join(dir, filename)
-	if _, err := os.Stat(path); err == nil {
+	_, err := os.Stat(path)
+	if err == nil {
 		base := strings.TrimSuffix(filename, filepath.Ext(filename))
 		ext := filepath.Ext(filename)
 		if ext == "" {
@@ -162,11 +163,11 @@ func uniqueFilePath(dir, filename string) (string, error) {
 			}
 		}
 		return "", errors.New("could not pick filename")
-	} else if errors.Is(err, os.ErrNotExist) {
-		return path, nil
-	} else {
-		return "", err
 	}
+	if errors.Is(err, os.ErrNotExist) {
+		return path, nil
+	}
+	return "", err
 }
 
 func downloadGIFToFile(gifURL, dest string) error {

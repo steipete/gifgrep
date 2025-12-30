@@ -6,6 +6,9 @@ run:
 
 linters:
   enable:
+    - asciicheck
+    - durationcheck
+    - errname
     - errcheck
     - govet
     - staticcheck
@@ -14,12 +17,31 @@ linters:
     - errorlint
     - bodyclose
     - bidichk
+    - gocritic
+    - gocyclo
     - misspell
+    - nilnil
     - unconvert
     - prealloc
     - predeclared
     - nolintlint
     - unparam
+
+linters-settings:
+  gocyclo:
+    min-complexity: 30
+  gocritic:
+    enabled-checks:
+      - appendAssign
+      - badCond
+      - boolExprSimplify
+      - emptyStringTest
+      - evalOrder
+      - ifElseChain
+      - octalLiteral
+      - rangeValCopy
+      - unslice
+      - whyNoLint
 
 formatters:
   enable:

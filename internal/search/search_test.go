@@ -53,7 +53,7 @@ func TestFetchGiphy(t *testing.T) {
 
 type badTenorTransport struct{}
 
-func (t *badTenorTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *badTenorTransport) RoundTrip(_ *http.Request) (*http.Response, error) {
 	body := "not-json"
 	return &http.Response{
 		StatusCode: 200,
@@ -64,7 +64,7 @@ func (t *badTenorTransport) RoundTrip(req *http.Request) (*http.Response, error)
 
 type statusTenorTransport struct{}
 
-func (t *statusTenorTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *statusTenorTransport) RoundTrip(_ *http.Request) (*http.Response, error) {
 	return &http.Response{
 		StatusCode: 500,
 		Body:       io.NopCloser(strings.NewReader("oops")),
@@ -86,7 +86,7 @@ func TestFetchTenorErrors(t *testing.T) {
 
 type noMediaTransport struct{}
 
-func (t *noMediaTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *noMediaTransport) RoundTrip(_ *http.Request) (*http.Response, error) {
 	body := `{"results":[{"id":"1","title":"No Media","media":[]},{"id":"2","title":"Gif Only","media":[{"gif":{"url":"https://example.test/full.gif","dims":[10,5]}}]}]}`
 	return &http.Response{
 		StatusCode: 200,

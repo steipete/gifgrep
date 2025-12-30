@@ -53,7 +53,7 @@ func TestLoadSelectedImageEdges(t *testing.T) {
 
 type errTransport struct{}
 
-func (t *errTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *errTransport) RoundTrip(_ *http.Request) (*http.Response, error) {
 	return nil, errors.New("network")
 }
 

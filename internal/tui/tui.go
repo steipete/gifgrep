@@ -354,6 +354,63 @@ func render(state *appState, out *bufio.Writer, rows, cols int) {
 		return
 	}
 
+	layout := buildLayout(state, rows, cols)
+
+	if state.currentAnim == nil && state.activeImageID != 0 {
+		kitty.DeleteImage(out, state.activeImageID)
+		state.activeImageID = 0
+	}
+
+	drawHeader(out, state.useColor, cols)
+
+	if !layout.hasContent {
+		clearAll(out, rows, cols)
+		return
+	}
+
+	if layout.clearWidth > 0 {
+		clearPreviewArea(out, layout)
+	}
+
+	drawList(out, state, layout)
+	drawPreviewIfNeeded(out, state, layout)
+	drawStatus(out, state, layout)
+	drawSearch(out, state, layout)
+	drawHints(out, state, layout)
+	clearUnused(out, layout)
+}
+
+type layout struct {
+	rows, cols                     int
+	statusRow, searchRow, hintsRow int
+	contentTop, contentBottom      int
+	contentHeight                  int
+	listCol, listWidth             int
+	listHeight                     int
+	previewCols, previewRows       int
+	previewRow, previewCol         int
+	clearWidth                     int
+	showRight                      bool
+	hasContent                     bool
+}
+
+func buildLayout(state *appState, rows, cols int) layout {
+	layout := layout{rows: rows, cols: cols}
+	layout.statusRow = rows - 2
+	layout.searchRow = rows - 1
+	layout.hintsRow = rows
+	if layout.statusRow < 2 {
+		return layout
+	}
+
+	layout.contentTop = 2
+	layout.contentBottom = layout.statusRow - 1
+	if layout.contentBottom < layout.contentTop {
+		return layout
+	}
+	layout.contentHeight = layout.contentBottom - layout.contentTop + 1
+	layout.hasContent = true
+
 	showRight := cols >= 80 && rows >= 14 && state.currentAnim != nil
 	minListWidth := 28
 	gapCols := 1
@@ -364,79 +421,66 @@ func render(state *appState, out *bufio.Writer, rows, cols int) {
 			showRight = false
 		}
 	}
+	layout.showRight = showRight
 
-	if state.currentAnim == nil && state.activeImageID != 0 {
-		kitty.DeleteImage(out, state.activeImageID)
-		state.activeImageID = 0
-	}
-
-	header := styleIf(state.useColor, "gifgrep", "\x1b[1m", "\x1b[36m")
-	header = header + styleIf(state.useColor, " — Grep the GIF. Stick the landing.", "\x1b[90m")
-	writeLineAt(out, 1, 1, header, cols)
-
-	statusRow := rows - 2
-	searchRow := rows - 1
-	hintsRow := rows
-	if statusRow < 2 {
-		for row := 1; row <= rows; row++ {
-			writeLineAt(out, row, 1, "", cols)
-		}
-		return
-	}
-
-	contentTop := 2
-	contentBottom := statusRow - 1
-	if contentBottom < contentTop {
-		for row := 1; row <= rows; row++ {
-			writeLineAt(out, row, 1, "", cols)
-		}
-		return
-	}
-	contentHeight := contentBottom - contentTop + 1
-
-	var previewCols, previewRows int
 	if showRight {
-		previewCols, previewRows = fitPreviewSize(maxPreviewCols, contentHeight, state.currentAnim)
+		layout.previewCols, layout.previewRows = fitPreviewSize(maxPreviewCols, layout.contentHeight, state.currentAnim)
 	} else {
-		availRows := contentHeight / 2
+		availRows := layout.contentHeight / 2
 		if availRows < 6 {
-			availRows = minInt(6, contentHeight)
+			availRows = minInt(6, layout.contentHeight)
 		}
-		if availRows > contentHeight-2 {
-			availRows = maxInt(0, contentHeight-2)
+		if availRows > layout.contentHeight-2 {
+			availRows = maxInt(0, layout.contentHeight-2)
 		}
-		previewCols, previewRows = fitPreviewSize(cols, availRows, state.currentAnim)
+		layout.previewCols, layout.previewRows = fitPreviewSize(cols, availRows, state.currentAnim)
 	}
 	if state.currentAnim == nil {
-		previewCols = 0
-		previewRows = 0
+		layout.previewCols = 0
+		layout.previewRows = 0
 	}
 
-	listCol := 1
-	listWidth := cols
-	if showRight {
-		if previewCols > 0 {
-			listCol = previewCols + gapCols + 1
-			listWidth = maxInt(0, cols-listCol+1)
+	layout.listCol = 1
+	layout.listWidth = cols
+	layout.listHeight = layout.contentHeight
+	if showRight && layout.previewCols > 0 {
+		layout.listCol = layout.previewCols + gapCols + 1
+		layout.listWidth = maxInt(0, cols-layout.listCol+1)
+		layout.clearWidth = layout.listCol - gapCols
+		layout.previewRow = layout.contentTop + maxInt(0, (layout.contentHeight-layout.previewRows)/2)
+		layout.previewCol = 1
+	} else if !showRight && layout.previewRows > 0 {
+		layout.listHeight = layout.contentHeight - layout.previewRows - 1
+		if layout.listHeight < 0 {
+			layout.listHeight = 0
 		}
+		layout.previewRow = layout.contentTop + layout.listHeight + 1
+		layout.previewCol = 1
 	}
 
-	listHeight := contentHeight
-	if !showRight && previewRows > 0 {
-		listHeight = contentHeight - previewRows - 1
-	}
-	if listHeight < 0 {
-		listHeight = 0
-	}
+	return layout
+}
 
-	if showRight && listCol > 1 {
-		leftWidth := listCol - gapCols
-		for i := 0; i < contentHeight; i++ {
-			writeLineAt(out, contentTop+i, 1, "", leftWidth)
-		}
-	}
+func drawHeader(out *bufio.Writer, useColor bool, cols int) {
+	header := styleIf(useColor, "gifgrep", "\x1b[1m", "\x1b[36m")
+	header += styleIf(useColor, " — Grep the GIF. Stick the landing.", "\x1b[90m")
+	writeLineAt(out, 1, 1, header, cols)
+}
 
-	for i := 0; i < listHeight; i++ {
+func clearAll(out *bufio.Writer, rows, cols int) {
+	for row := 1; row <= rows; row++ {
+		writeLineAt(out, row, 1, "", cols)
+	}
+}
+
+func clearPreviewArea(out *bufio.Writer, layout layout) {
+	for i := 0; i < layout.contentHeight; i++ {
+		writeLineAt(out, layout.contentTop+i, 1, "", layout.clearWidth)
+	}
+}
+
+func drawList(out *bufio.Writer, state *appState, layout layout) {
+	for i := 0; i < layout.listHeight; i++ {
 		idx := state.scroll + i
 		if idx >= 0 && idx < len(state.results) {
 			item := state.results[idx]
@@ -449,31 +493,37 @@ func render(state *appState, out *bufio.Writer, rows, cols int) {
 				prefix = styleIf(state.useColor, "> ", "\x1b[1m", "\x1b[36m")
 				label = styleIf(state.useColor, label, "\x1b[1m")
 			}
-			writeLineAt(out, contentTop+i, listCol, prefix+label, listWidth)
+			writeLineAt(out, layout.contentTop+i, layout.listCol, prefix+label, layout.listWidth)
 		} else {
-			writeLineAt(out, contentTop+i, listCol, "", listWidth)
+			writeLineAt(out, layout.contentTop+i, layout.listCol, "", layout.listWidth)
 		}
 	}
+}
 
-	if state.currentAnim != nil && previewCols > 0 && previewRows > 0 {
-		if showRight {
-			state.previewCol = 1
-			state.previewRow = contentTop + maxInt(0, (contentHeight-previewRows)/2)
-			moveCursor(out, state.previewRow, state.previewCol)
-			drawPreview(state, out, previewCols, previewRows, state.previewRow, state.previewCol)
-		} else {
-			label := styleIf(state.useColor, "Preview", "\x1b[90m")
-			writeLineAt(out, contentTop+listHeight, 1, label, cols)
-			state.previewRow = contentTop + listHeight + 1
-			state.previewCol = 1
-			for i := 0; i < previewRows; i++ {
-				writeLineAt(out, state.previewRow+i, 1, "", cols)
-			}
-			moveCursor(out, state.previewRow, state.previewCol)
-			drawPreview(state, out, previewCols, previewRows, state.previewRow, state.previewCol)
-		}
+func drawPreviewIfNeeded(out *bufio.Writer, state *appState, layout layout) {
+	if state.currentAnim == nil || layout.previewCols <= 0 || layout.previewRows <= 0 {
+		return
+	}
+	if layout.showRight {
+		state.previewCol = 1
+		state.previewRow = layout.previewRow
+		moveCursor(out, state.previewRow, state.previewCol)
+		drawPreview(state, out, layout.previewCols, layout.previewRows, state.previewRow, state.previewCol)
+		return
 	}
 
+	label := styleIf(state.useColor, "Preview", "\x1b[90m")
+	writeLineAt(out, layout.contentTop+layout.listHeight, 1, label, layout.cols)
+	state.previewRow = layout.previewRow
+	state.previewCol = layout.previewCol
+	for i := 0; i < layout.previewRows; i++ {
+		writeLineAt(out, state.previewRow+i, 1, "", layout.cols)
+	}
+	moveCursor(out, state.previewRow, state.previewCol)
+	drawPreview(state, out, layout.previewCols, layout.previewRows, state.previewRow, state.previewCol)
+}
+
+func drawStatus(out *bufio.Writer, state *appState, layout layout) {
 	status := state.status
 	if status == "" {
 		status = fmt.Sprintf("%d results", len(state.results))
@@ -482,24 +532,24 @@ func render(state *appState, out *bufio.Writer, rows, cols int) {
 	showGiphyAttribution := source == "giphy"
 	logoCols := 2
 	logoRows := 1
-	statusWidth := cols
+	statusWidth := layout.cols
 	if showGiphyAttribution {
 		status += " · Powered by GIPHY"
-		statusWidth = maxInt(0, cols-(logoCols+1))
+		statusWidth = maxInt(0, layout.cols-(logoCols+1))
 	}
 	status = styleIf(state.useColor, status, "\x1b[90m")
-	writeLineAt(out, statusRow, 1, status, statusWidth)
-	if showGiphyAttribution && cols >= logoCols {
-		moveCursor(out, statusRow, maxInt(1, cols-logoCols+1))
+	writeLineAt(out, layout.statusRow, 1, status, statusWidth)
+	if showGiphyAttribution && layout.cols >= logoCols {
+		moveCursor(out, layout.statusRow, maxInt(1, layout.cols-logoCols+1))
 		kitty.SendFrame(out, giphyAttributionImageID, gifdecode.Frame{PNG: assets.GiphyIcon32PNG()}, logoCols, logoRows)
 		state.giphyAttributionShown = true
-	} else {
-		if state.giphyAttributionShown {
-			kitty.DeleteImage(out, giphyAttributionImageID)
-			state.giphyAttributionShown = false
-		}
+	} else if state.giphyAttributionShown {
+		kitty.DeleteImage(out, giphyAttributionImageID)
+		state.giphyAttributionShown = false
 	}
+}
 
+func drawSearch(out *bufio.Writer, state *appState, layout layout) {
 	var searchLabel string
 	if state.mode == modeQuery {
 		searchLabel = styleIf(state.useColor, "Search: ", "\x1b[1m", "\x1b[33m")
@@ -507,21 +557,25 @@ func render(state *appState, out *bufio.Writer, rows, cols int) {
 		searchLabel = styleIf(state.useColor, "Search: ", "\x1b[90m")
 	}
 	searchLine := searchLabel + state.query
-	writeLineAt(out, searchRow, 1, searchLine, cols)
+	writeLineAt(out, layout.searchRow, 1, searchLine, layout.cols)
+}
 
+func drawHints(out *bufio.Writer, state *appState, layout layout) {
 	hints := "⏎ Search   / Edit   ↑↓ Select   d Download   q Quit"
 	hints = styleIf(state.useColor, hints, "\x1b[90m")
 	hints = strings.ReplaceAll(hints, "⏎", styleIf(state.useColor, "⏎", "\x1b[1m", "\x1b[36m"))
 	hints = strings.ReplaceAll(hints, "↑↓", styleIf(state.useColor, "↑↓", "\x1b[1m", "\x1b[36m"))
 	hints = strings.ReplaceAll(hints, "d", styleIf(state.useColor, "d", "\x1b[1m", "\x1b[36m"))
 	hints = strings.ReplaceAll(hints, "q", styleIf(state.useColor, "q", "\x1b[1m", "\x1b[36m"))
-	writeLineAt(out, hintsRow, 1, hints, cols)
+	writeLineAt(out, layout.hintsRow, 1, hints, layout.cols)
+}
 
-	for row := 1; row <= rows; row++ {
-		if row == 1 || (row >= contentTop && row <= contentBottom) || row == statusRow || row == searchRow || row == hintsRow {
+func clearUnused(out *bufio.Writer, layout layout) {
+	for row := 1; row <= layout.rows; row++ {
+		if row == 1 || (row >= layout.contentTop && row <= layout.contentBottom) || row == layout.statusRow || row == layout.searchRow || row == layout.hintsRow {
 			continue
 		}
-		writeLineAt(out, row, 1, "", cols)
+		writeLineAt(out, row, 1, "", layout.cols)
 	}
 }
 
