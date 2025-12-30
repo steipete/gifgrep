@@ -82,16 +82,16 @@ func TestRunTUIWithEmptyResultsAndSignal(t *testing.T) {
 	testutil.WithTransport(t, &emptyTenorTransport{}, func() {
 		sigs := make(chan os.Signal, 1)
 		sigs <- os.Interrupt
-			env := Env{
-				In:         bytes.NewReader([]byte("q")),
-				Out:        io.Discard,
-				FD:         1,
-				IsTerminal: func(int) bool { return true },
-				MakeRaw:    func(int) (*term.State, error) { return &term.State{}, nil },
-				Restore:    func(int, *term.State) error { return nil },
-				GetSize:    func(int) (int, int, error) { return 80, 24, nil },
-				SignalCh:   sigs,
-			}
+		env := Env{
+			In:         bytes.NewReader([]byte("q")),
+			Out:        io.Discard,
+			FD:         1,
+			IsTerminal: func(int) bool { return true },
+			MakeRaw:    func(int) (*term.State, error) { return &term.State{}, nil },
+			Restore:    func(int, *term.State) error { return nil },
+			GetSize:    func(int) (int, int, error) { return 80, 24, nil },
+			SignalCh:   sigs,
+		}
 		if err := runWith(env, model.Options{Source: "tenor"}, "cats"); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

@@ -31,6 +31,8 @@ func Search(query string, opts model.Options) ([]model.Result, error) {
 	switch opts.Source {
 	case "tenor":
 		return fetchTenorV1(query, opts)
+	case "giphy":
+		return fetchGiphyV1(query, opts)
 	default:
 		return nil, fmt.Errorf("unknown source: %s", opts.Source)
 	}

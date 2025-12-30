@@ -25,6 +25,13 @@ func (t *FakeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 			Header:     http.Header{"Content-Type": []string{"application/json"}},
 			Body:       io.NopCloser(strings.NewReader(body)),
 		}, nil
+	case "api.giphy.com":
+		body := `{"data":[{"id":"g1","title":"Cat One","images":{"original":{"url":"https://example.test/full.gif","width":"200","height":"100"},"fixed_width_small":{"url":"https://example.test/preview.gif","width":"50","height":"25"}}}]}`
+		return &http.Response{
+			StatusCode: 200,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body:       io.NopCloser(strings.NewReader(body)),
+		}, nil
 	case "example.test":
 		if req.URL.Path == "/preview.gif" || req.URL.Path == "/full.gif" {
 			return &http.Response{

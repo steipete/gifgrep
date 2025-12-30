@@ -34,7 +34,7 @@ func parseArgs(args []string) (model.Options, string, error) {
 	fs.BoolVar(&opts.Regex, "E", false, "regex search")
 	fs.BoolVar(&opts.Number, "n", false, "number results")
 	fs.IntVar(&opts.Limit, "m", 20, "max results")
-	fs.StringVar(&opts.Source, "source", "tenor", "source: tenor")
+	fs.StringVar(&opts.Source, "source", "tenor", "source: tenor|giphy")
 	fs.StringVar(&opts.Mood, "mood", "", "mood filter")
 	fs.StringVar(&opts.Color, "color", "auto", "color: auto|always|never")
 
@@ -70,7 +70,7 @@ func printUsage(w io.Writer) {
 	_, _ = fmt.Fprintln(w, "  --mood <s>    mood filter")
 	_, _ = fmt.Fprintln(w, "  --json        json output")
 	_, _ = fmt.Fprintln(w, "  --tui         interactive mode")
-	_, _ = fmt.Fprintln(w, "  --source <s>  source (tenor)")
+	_, _ = fmt.Fprintln(w, "  --source <s>  source (tenor, giphy)")
 	_, _ = fmt.Fprintln(w, "  --version     show version")
 	_, _ = fmt.Fprintln(w, "  -h, --help    show help")
 }

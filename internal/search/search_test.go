@@ -29,6 +29,28 @@ func TestFetchTenorAndGIF(t *testing.T) {
 	})
 }
 
+func TestFetchGiphy(t *testing.T) {
+	t.Setenv("GIPHY_API_KEY", "test-key")
+	gifData := testutil.MakeTestGIF()
+	testutil.WithTransport(t, &testutil.FakeTransport{GIFData: gifData}, func() {
+		out, err := fetchGiphyV1("cats", model.Options{Limit: 1, Source: "giphy"})
+		if err != nil {
+			t.Fatalf("fetchGiphyV1 failed: %v", err)
+		}
+		if len(out) != 1 {
+			t.Fatalf("expected 1 result")
+		}
+		if out[0].PreviewURL == "" || out[0].URL == "" {
+			t.Fatalf("missing URLs")
+		}
+
+		_, err = Search("cats", model.Options{Limit: 1, Source: "giphy"})
+		if err != nil {
+			t.Fatalf("Search giphy failed: %v", err)
+		}
+	})
+}
+
 type badTenorTransport struct{}
 
 func (t *badTenorTransport) RoundTrip(req *http.Request) (*http.Response, error) {

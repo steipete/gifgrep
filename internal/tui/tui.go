@@ -254,14 +254,14 @@ func handleInput(state *appState, ev inputEvent, out *bufio.Writer) bool {
 			render(state, out, state.lastRows, state.lastCols)
 			_ = out.Flush()
 
-				results, err := search.Search(state.query, state.opts)
+			results, err := search.Search(state.query, state.opts)
+			if err != nil {
+				state.status = "Search error: " + err.Error()
+			} else {
+				results, err = search.FilterResults(results, state.query, state.opts)
 				if err != nil {
-					state.status = "Search error: " + err.Error()
+					state.status = "Filter error: " + err.Error()
 				} else {
-					results, err = search.FilterResults(results, state.query, state.opts)
-					if err != nil {
-						state.status = "Filter error: " + err.Error()
-					} else {
 					state.results = results
 					state.selected = 0
 					state.scroll = 0
@@ -550,12 +550,12 @@ func drawPreview(state *appState, out *bufio.Writer, cols, rows int, row, col in
 		drawPreviewSoftware(state, out, cols, rows, row, col)
 		return
 	}
-		if state.previewNeedsSend {
-			if state.activeImageID != 0 {
-				kitty.DeleteImage(out, state.activeImageID)
-			}
-			state.activeImageID = state.currentAnim.ID
-			kitty.SendAnimation(out, state.currentAnim.ID, state.currentAnim.Frames, cols, rows)
+	if state.previewNeedsSend {
+		if state.activeImageID != 0 {
+			kitty.DeleteImage(out, state.activeImageID)
+		}
+		state.activeImageID = state.currentAnim.ID
+		kitty.SendAnimation(out, state.currentAnim.ID, state.currentAnim.Frames, cols, rows)
 		state.previewNeedsSend = false
 		state.previewDirty = false
 		state.lastPreview.cols = cols

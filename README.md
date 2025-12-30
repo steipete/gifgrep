@@ -46,6 +46,7 @@ gifgrep --tui [flags] <query>
 
 ## Environment variables
 - `TENOR_API_KEY` (optional): defaults to Tenor’s public demo key if unset
+- `GIPHY_API_KEY` (optional): required for `--source giphy`
 - `GIFGREP_SOFTWARE_ANIM=1` (optional): force software animation (auto-detects Ghostty)
 - `GIFGREP_CELL_ASPECT=0.5` (optional): tweak preview sizing for your terminal’s cell geometry
 
