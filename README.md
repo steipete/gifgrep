@@ -1,4 +1,4 @@
-# gifgrep — Grep the GIF. Stick the landing.
+# 🧲 gifgrep — Grep the GIF. Stick the landing.
 
 gifgrep searches GIF providers and gives you two fast paths: scriptable CLI output for pipes, and an interactive TUI with inline previews.
 
