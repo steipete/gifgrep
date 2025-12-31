@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 - Unreleased
+
+### Fixes
+- TUI: `f` (reveal) now auto-downloads the selected GIF if needed, then reveals it.
+
 ## 0.1.0 - 2025-12-31
 
 First public release of gifgrep — GIF search for terminals: scriptable CLI output plus a TUI with inline previews.

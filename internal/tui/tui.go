@@ -14,7 +14,6 @@ import (
 	"github.com/steipete/gifgrep/internal/assets"
 	"github.com/steipete/gifgrep/internal/kitty"
 	"github.com/steipete/gifgrep/internal/model"
-	"github.com/steipete/gifgrep/internal/reveal"
 	"github.com/steipete/gifgrep/internal/search"
 	"golang.org/x/term"
 )
@@ -104,6 +103,7 @@ func runWith(env Env, opts model.Options, query string) error {
 		status:          "Type a search and press Enter",
 		tagline:         pickTagline(time.Now(), os.Getenv, nil),
 		cache:           map[string]*gifdecode.Frames{},
+		savedPaths:      map[string]string{},
 		renderDirty:     true,
 		nextImageID:     1,
 		useSoftwareAnim: useSoftwareAnimation(),
@@ -305,10 +305,10 @@ func handleBrowseInput(state *appState, ev inputEvent, out *bufio.Writer) bool {
 		}
 		switch ev.ch {
 		case 'd':
-			downloadSelected(state, out)
+			downloadSelected(state, out, state.opts.Reveal)
 			return false
 		case 'f':
-			return handleReveal(state)
+			return handleRevealSelected(state, out)
 		default:
 		}
 		if ev.ch >= 0x20 {
@@ -344,22 +344,6 @@ func handleBrowseInput(state *appState, ev inputEvent, out *bufio.Writer) bool {
 	case keyBackspace, keyUnknown:
 		// ignore
 	}
-	return false
-}
-
-func handleReveal(state *appState) bool {
-	if state.lastSavedPath == "" {
-		state.status = "Nothing saved yet"
-		state.renderDirty = true
-		return false
-	}
-	if err := reveal.Reveal(state.lastSavedPath); err != nil {
-		state.status = "Reveal failed: " + err.Error()
-		state.renderDirty = true
-		return false
-	}
-	state.status = "Revealed " + state.lastSavedPath
-	state.renderDirty = true
 	return false
 }
 

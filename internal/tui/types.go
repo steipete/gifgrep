@@ -31,6 +31,7 @@ type appState struct {
 	status      string
 	currentAnim *gifAnimation
 	cache       map[string]*gifdecode.Frames
+	savedPaths  map[string]string
 	renderDirty bool
 	lastRows    int
 	lastCols    int
