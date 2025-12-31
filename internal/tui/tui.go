@@ -14,6 +14,7 @@ import (
 	"github.com/steipete/gifgrep/internal/assets"
 	"github.com/steipete/gifgrep/internal/kitty"
 	"github.com/steipete/gifgrep/internal/model"
+	"github.com/steipete/gifgrep/internal/reveal"
 	"github.com/steipete/gifgrep/internal/search"
 	"golang.org/x/term"
 )
@@ -234,101 +235,131 @@ func handleInput(state *appState, ev inputEvent, out *bufio.Writer) bool {
 
 	switch state.mode {
 	case modeQuery:
-		switch ev.kind {
-		case keyRune:
-			state.query += string(ev.ch)
-			state.renderDirty = true
-		case keyBackspace:
-			if len(state.query) > 0 {
-				state.query = state.query[:len(state.query)-1]
-				state.renderDirty = true
-			}
-		case keyEnter:
-			if strings.TrimSpace(state.query) == "" {
-				state.status = "Empty query"
-				state.renderDirty = true
-				return false
-			}
-			state.status = "Searching..."
-			render(state, out, state.lastRows, state.lastCols)
-			_ = out.Flush()
+		return handleQueryInput(state, ev, out)
+	case modeBrowse:
+		return handleBrowseInput(state, ev, out)
+	}
 
-			results, err := search.Search(state.query, state.opts)
-			if err != nil {
-				state.status = "Search error: " + err.Error()
+	return false
+}
+
+func handleQueryInput(state *appState, ev inputEvent, out *bufio.Writer) bool {
+	switch ev.kind {
+	case keyRune:
+		state.query += string(ev.ch)
+		state.renderDirty = true
+	case keyBackspace:
+		if len(state.query) > 0 {
+			state.query = state.query[:len(state.query)-1]
+			state.renderDirty = true
+		}
+	case keyEnter:
+		if strings.TrimSpace(state.query) == "" {
+			state.status = "Empty query"
+			state.renderDirty = true
+			return false
+		}
+		state.status = "Searching..."
+		render(state, out, state.lastRows, state.lastCols)
+		_ = out.Flush()
+
+		results, err := search.Search(state.query, state.opts)
+		if err != nil {
+			state.status = "Search error: " + err.Error()
+		} else {
+			state.results = results
+			state.selected = 0
+			state.scroll = 0
+			if len(results) == 0 {
+				state.status = "No results"
+				state.currentAnim = nil
+				state.previewDirty = true
 			} else {
-				state.results = results
-				state.selected = 0
-				state.scroll = 0
-				if len(results) == 0 {
-					state.status = "No results"
-					state.currentAnim = nil
-					state.previewDirty = true
-				} else {
-					state.status = fmt.Sprintf("%d results", len(results))
-					loadSelectedImage(state)
-				}
+				state.status = fmt.Sprintf("%d results", len(results))
+				loadSelectedImage(state)
 			}
+		}
+		state.mode = modeBrowse
+		state.renderDirty = true
+	case keyEsc:
+		if len(state.results) > 0 {
 			state.mode = modeBrowse
 			state.renderDirty = true
-		case keyEsc:
-			if len(state.results) > 0 {
-				state.mode = modeBrowse
-				state.renderDirty = true
-			}
-		case keyCtrlC:
-			return true
-		case keyUp, keyDown, keyUnknown:
-			// ignore
 		}
-	case modeBrowse:
-		switch ev.kind {
-		case keyRune:
-			if ev.ch == '/' {
-				state.mode = modeQuery
-				state.status = "Type a search and press Enter"
-				state.renderDirty = true
-				return false
-			}
-			if ev.ch == 'd' {
-				downloadSelected(state, out)
-				return false
-			}
-			if ev.ch >= 0x20 {
-				state.mode = modeQuery
-				state.status = "Type a search and press Enter"
-				state.query = string(ev.ch)
-				state.renderDirty = true
-				return false
-			}
-		case keyUp:
-			if state.selected > 0 {
-				state.selected--
-				ensureVisible(state)
-				loadSelectedImage(state)
-				state.renderDirty = true
-			}
-		case keyDown:
-			if state.selected < len(state.results)-1 {
-				state.selected++
-				ensureVisible(state)
-				loadSelectedImage(state)
-				state.renderDirty = true
-			}
-		case keyEnter:
+	case keyCtrlC:
+		return true
+	case keyUp, keyDown, keyUnknown:
+		// ignore
+	}
+	return false
+}
+
+func handleBrowseInput(state *appState, ev inputEvent, out *bufio.Writer) bool {
+	switch ev.kind {
+	case keyRune:
+		if ev.ch == '/' {
 			state.mode = modeQuery
 			state.status = "Type a search and press Enter"
 			state.renderDirty = true
-		case keyEsc:
-			state.mode = modeQuery
-			state.renderDirty = true
-		case keyCtrlC:
-			return true
-		case keyBackspace, keyUnknown:
-			// ignore
+			return false
 		}
+		switch ev.ch {
+		case 'd':
+			downloadSelected(state, out)
+			return false
+		case 'f':
+			return handleReveal(state)
+		default:
+		}
+		if ev.ch >= 0x20 {
+			state.mode = modeQuery
+			state.status = "Type a search and press Enter"
+			state.query = string(ev.ch)
+			state.renderDirty = true
+			return false
+		}
+	case keyUp:
+		if state.selected > 0 {
+			state.selected--
+			ensureVisible(state)
+			loadSelectedImage(state)
+			state.renderDirty = true
+		}
+	case keyDown:
+		if state.selected < len(state.results)-1 {
+			state.selected++
+			ensureVisible(state)
+			loadSelectedImage(state)
+			state.renderDirty = true
+		}
+	case keyEnter:
+		state.mode = modeQuery
+		state.status = "Type a search and press Enter"
+		state.renderDirty = true
+	case keyEsc:
+		state.mode = modeQuery
+		state.renderDirty = true
+	case keyCtrlC:
+		return true
+	case keyBackspace, keyUnknown:
+		// ignore
 	}
+	return false
+}
 
+func handleReveal(state *appState) bool {
+	if state.lastSavedPath == "" {
+		state.status = "Nothing saved yet"
+		state.renderDirty = true
+		return false
+	}
+	if err := reveal.Reveal(state.lastSavedPath); err != nil {
+		state.status = "Reveal failed: " + err.Error()
+		state.renderDirty = true
+		return false
+	}
+	state.status = "Revealed " + state.lastSavedPath
+	state.renderDirty = true
 	return false
 }
 
@@ -597,6 +628,7 @@ func drawHints(out *bufio.Writer, state *appState, layout layout) {
 		formatHint("/", "Edit"),
 		formatHint("↑↓", "Select"),
 		formatHint("d", "Download"),
+		formatHint("f", "Reveal"),
 		formatHint("q", "Quit"),
 	}, "  ")
 	hintsOffset := 0

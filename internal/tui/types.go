@@ -51,4 +51,5 @@ type appState struct {
 	useColor              bool
 	opts                  model.Options
 	giphyAttributionShown bool
+	lastSavedPath         string
 }

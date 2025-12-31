@@ -218,6 +218,7 @@ func tuiHelpExtras() []string {
 		"  /      edit search",
 		"  ↑↓     select",
 		"  d      download selection",
+		"  f      reveal last download in file manager",
 		"  q      quit",
 		"",
 		"Examples:",

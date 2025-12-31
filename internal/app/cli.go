@@ -11,6 +11,7 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/steipete/gifgrep/internal/model"
+	"github.com/steipete/gifgrep/internal/reveal"
 	"github.com/steipete/gifgrep/internal/search"
 	"github.com/steipete/gifgrep/internal/tui"
 	"golang.org/x/term"
@@ -28,6 +29,7 @@ type CLI struct {
 type Globals struct {
 	Color   string           `help:"Color output." enum:"auto,always,never" default:"auto"`
 	NoColor bool             `help:"Disable color output."`
+	Reveal  bool             `help:"Reveal output file in file manager."`
 	Verbose int              `help:"Verbose stderr logs (-vv for more)." short:"v" type:"counter"`
 	Quiet   bool             `help:"Suppress non-essential stderr output." short:"q"`
 	Version kong.VersionFlag `help:"Show version."`
@@ -40,6 +42,7 @@ func (g Globals) toOptions() model.Options {
 	}
 	return model.Options{
 		Color:   color,
+		Reveal:  g.Reveal,
 		Verbose: g.Verbose,
 		Quiet:   g.Quiet,
 	}
@@ -97,7 +100,16 @@ func (c *StillCmd) Run(_ *kong.Context, cli *CLI) error {
 	opts.StillAt = time.Duration(c.At)
 	opts.OutPath = c.Output
 	opts.StillsCount = 0
-	return runExtract(opts)
+	if err := runExtract(opts); err != nil {
+		return err
+	}
+	if opts.Reveal {
+		outPath := resolveExtractOutPath(opts)
+		if outPath != "-" {
+			return reveal.Reveal(outPath)
+		}
+	}
+	return nil
 }
 
 type SheetCmd struct {
@@ -116,7 +128,16 @@ func (c *SheetCmd) Run(_ *kong.Context, cli *CLI) error {
 	opts.StillsCols = c.Cols
 	opts.StillsPadding = c.Padding
 	opts.OutPath = c.Output
-	return runExtract(opts)
+	if err := runExtract(opts); err != nil {
+		return err
+	}
+	if opts.Reveal {
+		outPath := resolveExtractOutPath(opts)
+		if outPath != "-" {
+			return reveal.Reveal(outPath)
+		}
+	}
+	return nil
 }
 
 func runSearch(stdout io.Writer, stderr io.Writer, opts model.Options, query string) error {

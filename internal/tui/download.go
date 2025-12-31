@@ -15,6 +15,7 @@ import (
 	"unicode"
 
 	"github.com/steipete/gifgrep/internal/model"
+	"github.com/steipete/gifgrep/internal/reveal"
 )
 
 func downloadSelected(state *appState, out *bufio.Writer) {
@@ -37,6 +38,17 @@ func downloadSelected(state *appState, out *bufio.Writer) {
 	filePath, err := downloadGIFToDownloads(item)
 	if err != nil {
 		state.status = "Download error: " + err.Error()
+		state.renderDirty = true
+		return
+	}
+	state.lastSavedPath = filePath
+	if state.opts.Reveal {
+		if err := reveal.Reveal(filePath); err != nil {
+			state.status = "Saved " + filePath + " (reveal failed)"
+			state.renderDirty = true
+			return
+		}
+		state.status = "Saved " + filePath + " (revealed)"
 		state.renderDirty = true
 		return
 	}

@@ -65,6 +65,11 @@ func runExtract(opts model.Options) error {
 		output = pngData
 	}
 
+	outPath := resolveExtractOutPath(opts)
+	return writeOutput(outPath, output)
+}
+
+func resolveExtractOutPath(opts model.Options) string {
 	outPath := opts.OutPath
 	if outPath == "" {
 		if opts.StillSet {
@@ -73,7 +78,7 @@ func runExtract(opts model.Options) error {
 			outPath = "sheet.png"
 		}
 	}
-	return writeOutput(outPath, output)
+	return outPath
 }
 
 func readInput(input string) ([]byte, error) {

@@ -22,6 +22,7 @@ type Options struct {
 	Color   string
 	Verbose int
 	Quiet   bool
+	Reveal  bool
 
 	JSON   bool
 	Number bool
