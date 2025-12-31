@@ -42,23 +42,37 @@
           </p>
         </div>
 
-        <div class="terminal" aria-label="Example output">
-          <div class="dots" aria-hidden="true">
-            <div class="dot r"></div>
-            <div class="dot y"></div>
-            <div class="dot g"></div>
-          </div>
-          <div class="prompt">
-            <span class="out">$ </span><span class="cmd">gifgrep cats -m 3</span>
-            <span class="caret" aria-hidden="true"></span>
-            <span class="out">
+        <div class="side">
+          <div class="terminal" aria-label="Example output">
+            <div class="dots" aria-hidden="true">
+              <div class="dot r"></div>
+              <div class="dot y"></div>
+              <div class="dot g"></div>
+            </div>
+            <div class="prompt">
+              <span class="out">$ </span><span class="cmd">gifgrep cats -m 3</span>
+              <span class="caret" aria-hidden="true"></span>
+              <span class="out">
 https://media.tenor.com/.../cat-typing.gif
 https://media.tenor.com/.../cat-yes.gif
 https://media.tenor.com/.../cat-stare.gif
 
 $ gifgrep --tui "office handshake"
-            </span>
+              </span>
+            </div>
           </div>
+
+          <figure class="shot" aria-label="TUI screenshot">
+            <img
+              src="assets/gifgrep-tui.png"
+              width="1824"
+              height="1160"
+              alt="gifgrep TUI with animated inline previews (Kitty/Ghostty)"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption>TUI: arrow keys + animated inline previews (Kitty / Ghostty).</figcaption>
+          </figure>
         </div>
       </div>
 
@@ -101,6 +115,7 @@ $ gifgrep --tui "office handshake"
             <h2>Terminal notes</h2>
             <ul>
               <li>Inline previews use Kitty graphics (Kitty, Ghostty).</li>
+              <li>CLI thumbs are a still frame; animations are TUI-only.</li>
               <li>
                 Ghostty currently wants software animation:
                 <code>GIFGREP_SOFTWARE_ANIM=1</code> (auto-detected).

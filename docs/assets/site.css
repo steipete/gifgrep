@@ -162,6 +162,35 @@ h1 {
   position: relative;
 }
 
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.shot {
+  margin: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid rgba(18, 17, 15, 0.12);
+  box-shadow: var(--shadow);
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.shot figcaption {
+  padding: 10px 12px 11px;
+  border-top: 1px solid var(--rule);
+  color: rgba(18, 17, 15, 0.58);
+  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+}
+
 .dots {
   display: flex;
   gap: 8px;

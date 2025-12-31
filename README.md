@@ -2,7 +2,20 @@
 
 gifgrep searches GIF providers and gives you two fast paths: scriptable CLI output for pipes, and an interactive TUI with inline previews.
 
-<!-- Screenshot coming soon -->
+<table>
+  <tr>
+    <td width="50%">
+      <img alt="gifgrep TUI" src="docs/assets/gifgrep-tui.png" />
+      <br />
+      <sub><b>TUI</b> (animated inline previews)</sub>
+    </td>
+    <td width="50%">
+      <img alt="gifgrep CLI" src="docs/assets/gifgrep-cli.png" />
+      <br />
+      <sub><b>CLI</b> (pipeable output, optional still thumbs)</sub>
+    </td>
+  </tr>
+</table>
 
 CLI • TUI • Stills (PNG) • Kitty previews
 
@@ -23,7 +36,7 @@ go install github.com/steipete/gifgrep/cmd/gifgrep@latest
 ## Features
 
 - Scriptable search: readable plain output by default (TTY), plus `--format`, `--json`, `--max`, `--source`.
-- Inline thumbnails in search output: `--thumbs` (Kitty graphics; TTY only).
+- Inline thumbnails in search output: `--thumbs` (Kitty graphics; TTY only; still frame).
 - Download to `~/Downloads`: `--download` (CLI), `d` (TUI). Reveal with `--reveal` (CLI/TUI) or `f` (TUI).
 - TUI browser: inline preview, quick download, reveal last download.
 - Stills: `still` extracts one frame; `sheet` creates a PNG grid (`--frames`, `--cols`, `--padding`).
@@ -60,6 +73,21 @@ gifgrep tui [flags] [<query...>]
 gifgrep still <gif> --at <time> [-o <file>|-]
 gifgrep sheet <gif> [--frames <N>] [--cols <N>] [--padding <px>] [-o <file>|-]
 ```
+
+## TUI vs CLI (and why previews differ)
+
+- **CLI:** optimized for pipes. With `--thumbs`, it shows a *single still frame* inline (first decoded frame).
+- **TUI:** interactive browser. Inline previews are *animated* (full frame sequence).
+- Inline previews only work in **Kitty** or **Ghostty** (Kitty graphics protocol).
+
+## How inline previews work (Kitty graphics protocol)
+
+gifgrep decodes GIFs to PNG frames and streams them into the terminal via Kitty graphics escape sequences:
+
+- Base64-encode PNG bytes and chunk them (4096 chars) into `ESC _G ... ESC \\` payloads.
+- `a=T` uploads the base image; `a=f` appends animation frames (with per-frame delay).
+- `a=a` sets animation timing / starts playback; `a=p` places the image in a cell rectangle.
+- Old previews get cleaned up via `a=d` (delete by image id).
 
 ## JSON output
 
