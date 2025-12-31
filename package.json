@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "go run ./cmd/gifgrep",
-    "gifgrep": "pnpm start",
+    "start": "node scripts/run-go.mjs",
+    "gifgrep": "node scripts/run-go.mjs",
     "fmt": "gofumpt -w .",
     "lint": "golangci-lint run",
     "snap": "node scripts/ghostty-web-snap.mjs",
