@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 - Unreleased
+## 0.2.0 - 2026-01-01
 
 ### Features
 - Inline previews: add iTerm2 support (OSC 1337) for TUI preview and CLI `--thumbs`.
