@@ -37,9 +37,15 @@ func main() {
 	if asJSON {
 		enc := json.NewEncoder(os.Stdout)
 		enc.SetIndent("", "  ")
-		_ = enc.Encode(r)
+		if err := enc.Encode(r); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "encode: %v\n", err)
+			os.Exit(1)
+		}
 	} else {
-		fmt.Fprintln(os.Stdout, r.Detected)
+		if _, err := fmt.Fprintln(os.Stdout, r.Detected); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "write: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 	if expect != "" && expect != r.Detected {

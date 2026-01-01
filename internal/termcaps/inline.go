@@ -16,6 +16,8 @@ const (
 
 func (p InlineProtocol) String() string {
 	switch p {
+	case InlineNone:
+		return "none"
 	case InlineKitty:
 		return "kitty"
 	case InlineIterm:

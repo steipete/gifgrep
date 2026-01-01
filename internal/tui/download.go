@@ -9,8 +9,10 @@ import (
 	"github.com/steipete/gifgrep/internal/reveal"
 )
 
-var downloadToDownloadsFn = download.ToDownloads
-var revealFn = reveal.Reveal
+var (
+	downloadToDownloadsFn = download.ToDownloads
+	revealFn              = reveal.Reveal
+)
 
 func downloadSelected(state *appState, out *bufio.Writer, revealAfter bool) {
 	if state.selected < 0 || state.selected >= len(state.results) {

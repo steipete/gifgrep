@@ -166,11 +166,11 @@ func renderThumbBlock(out *bufio.Writer, thumbs termcaps.InlineProtocol, id uint
 	}
 
 	switch thumbs {
+	case termcaps.InlineNone:
+		return fmt.Errorf("inline thumbnails not supported")
 	case termcaps.InlineIterm:
 		sendThumbIterm(out, decoded.Frames[0].PNG, cols, rows)
 	case termcaps.InlineKitty:
-		fallthrough
-	default:
 		sendThumbKitty(out, id, decoded.Frames[0], cols, rows)
 	}
 	for r := 0; r < rows; r++ {

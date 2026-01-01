@@ -56,7 +56,7 @@ func errUnsupportedInline(getenv func(string) string) error {
 	termProgram := strings.TrimSpace(getenv("TERM_PROGRAM"))
 	term := strings.TrimSpace(getenv("TERM"))
 	return fmt.Errorf(
-		"gifgrep tui needs inline image support.\n\nSupported terminals:\n  - Kitty (Kitty graphics protocol)\n  - Ghostty (Kitty graphics protocol)\n  - iTerm2 (OSC 1337 inline images)\n\nDetected:\n  TERM_PROGRAM=%q\n  TERM=%q\n\nSee: docs/kitty.md and docs/iterm.md\n\nTip: You can force detection with GIFGREP_INLINE=kitty|iterm|none.",
+		"gifgrep tui needs inline image support.\n\nSupported terminals:\n  - Kitty (Kitty graphics protocol)\n  - Ghostty (Kitty graphics protocol)\n  - iTerm2 (OSC 1337 inline images)\n\nDetected:\n  TERM_PROGRAM=%q\n  TERM=%q\n\nSee: docs/kitty.md and docs/iterm.md\n\nTip: You can force detection with GIFGREP_INLINE=kitty|iterm|none",
 		termProgram,
 		term,
 	)

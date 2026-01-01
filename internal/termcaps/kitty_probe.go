@@ -16,7 +16,6 @@ func probeKittyGraphics(tty *os.File, timeout time.Duration) kittyProbeResult {
 
 	// Example from kitty docs:
 	// <ESC>_Gi=31,s=1,v=1,a=q,t=d,f=24;AAAA<ESC>\<ESC>[c
-	const queryID = 31
 	_, _ = tty.Write([]byte("\x1b_Gi=31,s=1,v=1,a=q,t=d,f=24;AAAA\x1b\\\x1b[c"))
 
 	deadline := time.Now().Add(timeout)
