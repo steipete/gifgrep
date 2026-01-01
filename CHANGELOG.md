@@ -1,26 +1,28 @@
 # Changelog
 
-## 0.1.1 - Unreleased
+## 0.2.0 - Unreleased
 
 ### Features
 - Inline previews: add iTerm2 support (OSC 1337) for TUI preview and CLI `--thumbs`.
+- Inline detection: robust Kitty graphics probing (a=q), plus `GIFGREP_INLINE=kitty|iterm|none`.
 
 ### Fixes
 - TUI: `f` (reveal) now auto-downloads the selected GIF if needed, then reveals it.
 - TUI: avoid emitting Kitty graphics sequences on unsupported terminals (no more base64 spew).
 - TUI: when inline images aren’t supported, exit with a helpful “supported terminals / protocol” message.
-- Inline detection: use Kitty graphics query (a=q) when available to avoid false positives.
-- TUI: make hint keys ASCII to avoid double-width glyph centering drift.
+- TUI: hint row centering (wide glyphs).
 - iTerm2: keep animated previews running after UI redraws (don’t clear preview every render).
 - iTerm2: clear previous preview when re-sending (avoid “stacked” images after reveal/resize).
-- iTerm2: fix repaint artifacts when preview size changes (clear content on resend + keep gap column clean).
+- iTerm2: fix repaint artifacts when preview size changes (gap clean + row erases + hard clear on shrink).
 - TUI: show download/reveal transient status in the header (no “sticky” status row spam).
+- TUI: clearer iTerm send pipeline when resizing/moving preview rect.
 
 ### Dev
 - Replace pnpm workflow with `make` + npm (`make snap`, `make gifgrep ...`).
-- Drop Node `run-go` wrapper; `make gifgrep ...` rebuilds via Go deps.
+- Drop Node `run-go` wrapper; Go-only runner.
 - Add macOS terminal capability e2e smoke: `make termcaps-e2e`.
 - Tests: add iTerm2 redraw regression for inline previews.
+- Make: `--` passthrough (`make gifgrep -- --version`), `gifgrek` alias, always rebuild `make gifgrep ...`.
 
 ### Docs
 - Add `docs/kitty.md` and `docs/iterm.md` (protocol notes).
