@@ -669,9 +669,9 @@ func drawHints(out *bufio.Writer, state *appState, layout layout) {
 		return styleIf(true, key, "\x1b[1m", "\x1b[36m") + " " + styleIf(true, label, "\x1b[90m")
 	}
 	hints := strings.Join([]string{
-		formatHint("Enter", "Search"),
+		formatHint("⏎", "Search"),
 		formatHint("/", "Edit"),
-		formatHint("Up/Down", "Select"),
+		formatHint("↑↓", "Select"),
 		formatHint("d", "Download"),
 		formatHint("f", "Reveal"),
 		formatHint("q", "Quit"),
