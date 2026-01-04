@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.2.1 — Unreleased
+## 0.2.2 — Unreleased
+
+## 0.2.1 - 2026-01-04
 
 ### Fixes
 - iTerm2 CLI `--thumbs`: animated GIFs (send raw bytes), correct title/URL alignment, wrap URLs, and add spacing between results.
