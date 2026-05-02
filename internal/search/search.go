@@ -12,25 +12,27 @@ import (
 	"github.com/steipete/gifgrep/internal/model"
 )
 
-type tenorV1Response struct {
-	Results []struct {
-		ID                 string               `json:"id"`
-		Title              string               `json:"title"`
-		ContentDescription string               `json:"content_description"`
-		Tags               []string             `json:"tags"`
-		Media              []map[string]mediaV1 `json:"media"`
-	} `json:"results"`
+type klipyV2Response struct {
+	Results []klipyV2Result `json:"results"`
 }
 
-type mediaV1 struct {
+type klipyV2Result struct {
+	ID                 string             `json:"id"`
+	Title              string             `json:"title"`
+	ContentDescription string             `json:"content_description"`
+	Tags               []string           `json:"tags"`
+	MediaFormats       map[string]mediaV2 `json:"media_formats"`
+}
+
+type mediaV2 struct {
 	URL  string `json:"url"`
 	Dims []int  `json:"dims"`
 }
 
 func Search(query string, opts model.Options) ([]model.Result, error) {
 	switch ResolveSource(opts.Source) {
-	case "tenor":
-		return fetchTenorV1(query, opts)
+	case "klipy":
+		return fetchKlipyV2(query, opts)
 	case "giphy":
 		return fetchGiphyV1(query, opts)
 	default:
@@ -38,13 +40,10 @@ func Search(query string, opts model.Options) ([]model.Result, error) {
 	}
 }
 
-func fetchTenorV1(query string, opts model.Options) ([]model.Result, error) {
-	apiKey := os.Getenv("TENOR_API_KEY")
+func fetchKlipyV2(query string, opts model.Options) ([]model.Result, error) {
+	apiKey := os.Getenv("KLIPY_API_KEY")
 	if apiKey == "" {
-		apiKey = "LIVDSRZULELA"
-	}
-	if apiKey == "" {
-		return nil, errors.New("missing TENOR_API_KEY")
+		return nil, errors.New("missing KLIPY_API_KEY")
 	}
 	limit := opts.Limit
 	if limit <= 0 {
@@ -56,8 +55,9 @@ func fetchTenorV1(query string, opts model.Options) ([]model.Result, error) {
 	params.Set("key", apiKey)
 	params.Set("limit", fmt.Sprintf("%d", limit))
 	params.Set("contentfilter", "low")
+	params.Set("media_filter", "gif,tinygif,mediumgif,nanogif,preview")
 
-	reqURL := "https://api.tenor.com/v1/search?" + params.Encode()
+	reqURL := "https://api.klipy.com/v2/search?" + params.Encode()
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
@@ -76,13 +76,14 @@ func fetchTenorV1(query string, opts model.Options) ([]model.Result, error) {
 		return nil, fmt.Errorf("http %d", resp.StatusCode)
 	}
 
-	var parsed tenorV1Response
+	var parsed klipyV2Response
 	if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
 		return nil, err
 	}
 
 	out := make([]model.Result, 0, len(parsed.Results))
-	for _, r := range parsed.Results {
+	for i := range parsed.Results {
+		r := &parsed.Results[i]
 		title := r.Title
 		if title == "" {
 			title = r.ContentDescription
@@ -90,43 +91,43 @@ func fetchTenorV1(query string, opts model.Options) ([]model.Result, error) {
 		if title == "" {
 			title = r.ID
 		}
-		gifURL := ""
-		preview := ""
-		width := 0
-		height := 0
-		if len(r.Media) > 0 {
-			media := r.Media[0]
-			if m, ok := media["gif"]; ok {
-				gifURL = m.URL
-				if len(m.Dims) == 2 {
-					width, height = m.Dims[0], m.Dims[1]
-				}
-			}
-			if m, ok := media["tinygif"]; ok {
-				preview = m.URL
-				if gifURL == "" {
-					gifURL = m.URL
-					if len(m.Dims) == 2 {
-						width, height = m.Dims[0], m.Dims[1]
-					}
-				}
-			}
-			if preview == "" {
-				preview = gifURL
-			}
-		}
-		if gifURL == "" {
+
+		gifMedia, ok := mediaFormat(r.MediaFormats, "gif", "mediumgif", "tinygif", "nanogif", "preview")
+		if !ok || gifMedia.URL == "" {
 			continue
 		}
+		previewMedia, ok := mediaFormat(r.MediaFormats, "tinygif", "nanogif", "preview", "mediumgif", "gif")
+		if !ok || previewMedia.URL == "" {
+			previewMedia = gifMedia
+		}
+		width, height := mediaDims(gifMedia)
+
 		out = append(out, model.Result{
 			ID:         r.ID,
 			Title:      title,
-			URL:        gifURL,
-			PreviewURL: preview,
+			URL:        gifMedia.URL,
+			PreviewURL: previewMedia.URL,
 			Tags:       r.Tags,
 			Width:      width,
 			Height:     height,
 		})
 	}
 	return out, nil
+}
+
+func mediaFormat(formats map[string]mediaV2, names ...string) (mediaV2, bool) {
+	for _, name := range names {
+		media, ok := formats[name]
+		if ok && media.URL != "" {
+			return media, true
+		}
+	}
+	return mediaV2{}, false
+}
+
+func mediaDims(media mediaV2) (int, int) {
+	if len(media.Dims) != 2 {
+		return 0, 0
+	}
+	return media.Dims[0], media.Dims[1]
 }

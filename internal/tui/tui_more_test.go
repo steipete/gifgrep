@@ -70,9 +70,9 @@ func TestRunTUIWithSizeError(t *testing.T) {
 	}
 }
 
-type emptyTenorTransport struct{}
+type emptyKlipyTransport struct{}
 
-func (t *emptyTenorTransport) RoundTrip(_ *http.Request) (*http.Response, error) {
+func (t *emptyKlipyTransport) RoundTrip(_ *http.Request) (*http.Response, error) {
 	body := `{"results":[]}`
 	return &http.Response{
 		StatusCode: http.StatusOK,
@@ -83,7 +83,8 @@ func (t *emptyTenorTransport) RoundTrip(_ *http.Request) (*http.Response, error)
 
 func TestRunTUIWithEmptyResultsAndSignal(t *testing.T) {
 	t.Setenv("GIFGREP_INLINE", "kitty")
-	testutil.WithTransport(t, &emptyTenorTransport{}, func() {
+	t.Setenv("KLIPY_API_KEY", "test-key")
+	testutil.WithTransport(t, &emptyKlipyTransport{}, func() {
 		sigs := make(chan os.Signal, 1)
 		sigs <- os.Interrupt
 		env := Env{

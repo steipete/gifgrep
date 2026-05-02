@@ -52,7 +52,7 @@ func (g Globals) toOptions() model.Options {
 }
 
 type SearchCmd struct {
-	Source   string `help:"Source to search." enum:"auto,tenor,giphy" default:"auto"`
+	Source   string `help:"Source to search." enum:"auto,klipy,tenor,giphy" default:"auto"`
 	Max      int    `help:"Max results to fetch." name:"max" short:"m" default:"20"`
 	JSON     bool   `help:"Emit JSON array of results."`
 	Number   bool   `help:"Prefix lines with 1-based index." short:"n"`
@@ -81,7 +81,7 @@ func (c *SearchCmd) Run(ctx *kong.Context, cli *CLI) error {
 }
 
 type TUICmd struct {
-	Source string `help:"Source to search." enum:"auto,tenor,giphy" default:"auto"`
+	Source string `help:"Source to search." enum:"auto,klipy,tenor,giphy" default:"auto"`
 	Max    int    `help:"Max results to fetch." name:"max" short:"m" default:"20"`
 
 	Query []string `arg:"" optional:"" name:"query" help:"Initial query."`

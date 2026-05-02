@@ -195,7 +195,7 @@ func rootHelpExtras() []string {
 		"  gifgrep sheet cat.gif --frames 12 --cols 4 -o sheet.png",
 		"",
 		"Environment:",
-		"  TENOR_API_KEY  optional (defaults to Tenor demo key)",
+		"  KLIPY_API_KEY  required for --source klipy/tenor",
 		"  GIPHY_API_KEY  required for --source giphy",
 	}
 }
@@ -211,7 +211,8 @@ func searchHelpExtras() []string {
 		"  gifgrep cats | head -n 5",
 		"  gifgrep cats --download --max 1 --format url",
 		"  gifgrep search --json cats | jq '.[] | .url'",
-		"  gifgrep search --source tenor cats",
+		"  KLIPY_API_KEY=... gifgrep search --source klipy cats",
+		"  KLIPY_API_KEY=... gifgrep search --source tenor cats",
 		"  GIPHY_API_KEY=... gifgrep search --source giphy cats",
 	}
 }

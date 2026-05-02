@@ -41,7 +41,7 @@ go install github.com/steipete/gifgrep/cmd/gifgrep@latest
 - TUI browser: inline preview, quick download, reveal last download.
 - Stills: `still` extracts one frame; `sheet` creates a PNG grid (`--frames`, `--cols`, `--padding`).
 - Color + logging: `--color/--no-color`, `--quiet`, `--verbose`.
-- Providers: `auto` (prefers Giphy when keyed), `tenor`, `giphy`.
+- Providers: `auto` (prefers Giphy when keyed), `klipy`, `tenor` (compatibility alias), `giphy`.
 
 ## Quickstart
 
@@ -60,8 +60,9 @@ gifgrep sheet ./clip.gif --frames 9 --cols 3 -o sheet.png
 
 Select via `--source` (search + TUI):
 
-- `auto` (default): picks Giphy when `GIPHY_API_KEY` is set, else Tenor.
-- `tenor`: uses public demo key if `TENOR_API_KEY` is unset.
+- `auto` (default): picks Giphy when `GIPHY_API_KEY` is set, else Klipy (`KLIPY_API_KEY` required).
+- `klipy`: requires `KLIPY_API_KEY`.
+- `tenor`: backwards-compatible alias for Klipy, using `KLIPY_API_KEY`.
 - `giphy`: requires `GIPHY_API_KEY`.
 
 ## CLI
@@ -103,7 +104,7 @@ iTerm2 uses a different protocol (OSC 1337). See `docs/iterm.md`.
 
 ## Environment
 
-- `TENOR_API_KEY` (optional)
+- `KLIPY_API_KEY` (required for `--source klipy` / `--source tenor`)
 - `GIPHY_API_KEY` (required for `--source giphy`)
 - `GIFGREP_SOFTWARE_ANIM=1` (force software playback; default on Ghostty)
 - `GIFGREP_CELL_ASPECT=0.5` (tweak preview cell geometry)

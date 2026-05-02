@@ -11,7 +11,10 @@ func ResolveSource(source string) string {
 		if os.Getenv("GIPHY_API_KEY") != "" {
 			return "giphy"
 		}
-		return "tenor"
+		return "klipy"
+	}
+	if source == "tenor" {
+		return "klipy"
 	}
 	return source
 }

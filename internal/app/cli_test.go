@@ -12,6 +12,7 @@ import (
 )
 
 func TestRunSearchOutput(t *testing.T) {
+	t.Setenv("KLIPY_API_KEY", "test-key")
 	gifData := testutil.MakeTestGIF()
 	testutil.WithTransport(t, &testutil.FakeTransport{GIFData: gifData}, func() {
 		var stdout bytes.Buffer
@@ -28,6 +29,7 @@ func TestRunSearchOutput(t *testing.T) {
 }
 
 func TestRunSearchJSON(t *testing.T) {
+	t.Setenv("KLIPY_API_KEY", "test-key")
 	gifData := testutil.MakeTestGIF()
 	testutil.WithTransport(t, &testutil.FakeTransport{GIFData: gifData}, func() {
 		var stdout bytes.Buffer
