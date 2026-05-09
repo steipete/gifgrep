@@ -4,8 +4,9 @@
 
 ### Changes
 
-- Search: replace the Tenor API backend with Klipy. `--source tenor` remains as a compatibility alias,
+- Search: replace the Tenor API backend with KLIPY. `--source tenor` remains as a compatibility alias,
   `--source klipy` is available directly, and `KLIPY_API_KEY` is now required for that provider.
+  Thanks @ZeterMordio.
 
 ## 0.2.3 - 2026-02-04
 ### Fixes
