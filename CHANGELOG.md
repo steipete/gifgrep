@@ -1,6 +1,25 @@
 # Changelog
 
-## 0.2.4 — Unreleased
+## 0.3.0 — Unreleased
+
+### Changes
+
+- Search: replace the Tenor API backend with KLIPY. `--source tenor` remains as a compatibility alias,
+  `--source klipy` is available directly, and `KLIPY_API_KEY` is now required for that provider.
+  Thanks @ZeterMordio.
+
+### Fixes
+
+- Search: let `auto` fall back to KLIPY when a configured Giphy key fails.
+
+### Docs
+
+- Document `auto` provider fallback from Giphy to KLIPY.
+
+### Dev
+
+- E2E: make terminal capability checks deterministic by default, with real GUI app checks opt-in.
+- E2E: harden the Ghostty web snapshot helper and verify the KLIPY TUI renders.
 
 ## 0.2.3 - 2026-02-04
 ### Fixes

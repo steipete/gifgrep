@@ -1,4 +1,4 @@
-.PHONY: fmt lint test check build cover snap node-deps playwright-install run start gifgrep gifgrek termcaps-e2e
+.PHONY: fmt lint test check build cover snap node-deps playwright-install run start gifgrep gifgrek termcaps-e2e termcaps-e2e-gui
 
 GIFGREP_ARGS ?=
 BINDIR ?= bin
@@ -37,6 +37,9 @@ snap:
 
 termcaps-e2e:
 	bash scripts/termcaps-e2e-macos.sh
+
+termcaps-e2e-gui:
+	bash scripts/termcaps-e2e-gui-macos.sh
 
 node-deps:
 	npm install

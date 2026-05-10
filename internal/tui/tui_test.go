@@ -48,6 +48,8 @@ func TestEnsureVisible(t *testing.T) {
 }
 
 func TestHandleInputAndLoad(t *testing.T) {
+	t.Setenv("GIFGREP_TUI_PREFETCH_MAX_BYTES", "0")
+	t.Setenv("KLIPY_API_KEY", "test-key")
 	gifData := testutil.MakeTestGIF()
 	testutil.WithTransport(t, &testutil.FakeTransport{GIFData: gifData}, func() {
 		state := &appState{
@@ -203,11 +205,14 @@ func TestRenderAndLines(t *testing.T) {
 	if strings.Contains(text, "\x1b_G") {
 		t.Fatalf("unexpected kitty graphics data")
 	}
+	if !strings.Contains(text, "Powered by KLIPY") {
+		t.Fatalf("missing KLIPY attribution")
+	}
 
 	buf.Reset()
 	render(state, out, 20, 90)
 	_ = out.Flush()
-	if !strings.Contains(buf.String(), "[Search]") {
+	if !strings.Contains(buf.String(), "[Search KLIPY]") {
 		t.Fatalf("expected search line")
 	}
 

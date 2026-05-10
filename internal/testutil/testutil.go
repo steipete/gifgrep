@@ -18,8 +18,8 @@ type FakeTransport struct {
 
 func (t *FakeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	switch req.URL.Host {
-	case "api.tenor.com":
-		body := `{"results":[{"id":"1","title":"Cat One","content_description":"","tags":["cat","fun"],"media":[{"gif":{"url":"https://example.test/full.gif","dims":[200,100]},"tinygif":{"url":"https://example.test/preview.gif","dims":[50,25]}}]}]}`
+	case "api.klipy.com":
+		body := `{"results":[{"id":"1","title":"Cat One","content_description":"","tags":["cat","fun"],"media_formats":{"gif":{"url":"https://example.test/full.gif","dims":[200,100]},"tinygif":{"url":"https://example.test/preview.gif","dims":[50,25]}}}]}`
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Header:     http.Header{"Content-Type": []string{"application/json"}},

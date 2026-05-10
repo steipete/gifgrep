@@ -1,0 +1,138 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build/upload (for example, v0.2.3)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: darwin
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: linux
+            goarch: amd64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref="${{ inputs.tag || github.ref_name }}"
+          version="${ref#v}"
+          target="${GOOS}_${GOARCH}"
+          out_dir="dist/gifgrep_${version}_${target}"
+          mkdir -p "$out_dir"
+          go build -trimpath -ldflags="-s -w" -o "$out_dir/gifgrep" ./cmd/gifgrep
+          cp README.md LICENSE "$out_dir/"
+          tar -C "$out_dir" -czf "dist/gifgrep_${version}_${target}.tar.gz" gifgrep README.md LICENSE
+          sha256sum "dist/gifgrep_${version}_${target}.tar.gz" > "dist/gifgrep_${version}_${target}.tar.gz.sha256"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: gifgrep-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            dist/*.tar.gz
+            dist/*.sha256
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+
+      - name: Flatten artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          find artifacts -type f -maxdepth 3 -print0 | xargs -0 -I{} cp {} dist/
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          files: dist/*
+
+  update-homebrew-tap:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Resolve release tag
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ inputs.tag || github.ref_name }}"
+          if [[ -z "$tag" ]]; then
+            echo "Missing release tag." >&2
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "request_id=gifgrep-${tag}-${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch tap update
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN"
+          gh workflow run update-formula.yml \
+            --repo steipete/homebrew-tap \
+            -f formula=gifgrep \
+            -f tag="${{ steps.release.outputs.tag }}" \
+            -f repository=steipete/gifgrep \
+            -f artifact_template='gifgrep_{version}_{target}.tar.gz' \
+            -f request_id="${{ steps.release.outputs.request_id }}"
+
+      - name: Wait for tap update
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for _ in {1..20}; do
+            run_id="$(gh run list --repo steipete/homebrew-tap --workflow update-formula.yml --json databaseId,displayTitle --jq '.[] | select(.displayTitle | contains("${{ steps.release.outputs.request_id }}")) | .databaseId' | head -n1)"
+            if [[ -n "$run_id" ]]; then
+              gh run watch "$run_id" --repo steipete/homebrew-tap --exit-status
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Timed out waiting for tap workflow to appear." >&2
+          exit 1

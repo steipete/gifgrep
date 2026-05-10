@@ -64,14 +64,14 @@ func sendKittyData(out *bufio.Writer, data kittyData) {
 	encoded := base64.StdEncoding.EncodeToString(data.Data)
 	const chunkSize = 4096
 	first := true
-	for len(encoded) > 0 {
+	for encoded != "" {
 		chunk := encoded
 		if len(chunk) > chunkSize {
 			chunk = chunk[:chunkSize]
 		}
 		encoded = encoded[len(chunk):]
 		more := 0
-		if len(encoded) > 0 {
+		if encoded != "" {
 			more = 1
 		}
 		if first {

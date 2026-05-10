@@ -1,4 +1,4 @@
-version: 2
+version: "2"
 
 run:
   timeout: 5m
@@ -38,26 +38,22 @@ linters:
     - nolintlint
     - wastedassign
     - unparam
-
-linters-settings:
-  gocyclo:
-    min-complexity: 30
-  gocritic:
-    enabled-checks:
-      - appendAssign
-      - badCond
-      - boolExprSimplify
-      - emptyStringTest
-      - evalOrder
-      - ifElseChain
-      - octalLiteral
-      - rangeValCopy
-      - unslice
-      - whyNoLint
+  settings:
+    gocyclo:
+      min-complexity: 30
+    gocritic:
+      enabled-checks:
+        - appendAssign
+        - badCond
+        - boolExprSimplify
+        - emptyStringTest
+        - evalOrder
+        - ifElseChain
+        - octalLiteral
+        - rangeValCopy
+        - unslice
+        - whyNoLint
 
 formatters:
   enable:
     - gofumpt
-
-issues:
-  exclude-use-default: false

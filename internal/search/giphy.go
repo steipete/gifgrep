@@ -77,7 +77,8 @@ func fetchGiphyV1(query string, opts model.Options) ([]model.Result, error) {
 	}
 
 	out := make([]model.Result, 0, len(parsed.Data))
-	for _, item := range parsed.Data {
+	for i := range parsed.Data {
+		item := &parsed.Data[i]
 		gifURL := item.Images.Original.URL
 		preview := item.Images.FixedWidthSmall.URL
 		if preview == "" {

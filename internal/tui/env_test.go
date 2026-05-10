@@ -45,6 +45,8 @@ func TestRunTUIWithQuit(t *testing.T) {
 
 func TestRunTUIWithSearch(t *testing.T) {
 	t.Setenv("GIFGREP_INLINE", "kitty")
+	t.Setenv("GIFGREP_TUI_PREFETCH_MAX_BYTES", "0")
+	t.Setenv("KLIPY_API_KEY", "test-key")
 	gifData := testutil.MakeTestGIF()
 	testutil.WithTransport(t, &testutil.FakeTransport{GIFData: gifData}, func() {
 		env := Env{

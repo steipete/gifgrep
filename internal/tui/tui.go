@@ -353,7 +353,7 @@ func handleQueryInput(state *appState, ev inputEvent, out *bufio.Writer, prefetc
 		state.query += string(ev.ch)
 		state.renderDirty = true
 	case keyBackspace:
-		if len(state.query) > 0 {
+		if state.query != "" {
 			state.query = state.query[:len(state.query)-1]
 			state.renderDirty = true
 		}
@@ -698,6 +698,7 @@ func drawStatus(out *bufio.Writer, state *appState, layout layout) {
 	}
 	source := search.ResolveSource(state.opts.Source)
 	showGiphyAttribution := source == "giphy"
+	showKlipyAttribution := source == "klipy"
 	showGiphyIcon := showGiphyAttribution && state.inline == termcaps.InlineKitty
 	logoCols := 2
 	logoRows := 1
@@ -708,6 +709,8 @@ func drawStatus(out *bufio.Writer, state *appState, layout layout) {
 	line := formatStatusLine(state.useColor, status)
 	if showGiphyAttribution {
 		line += styleIf(state.useColor, " · Powered by GIPHY", "\x1b[90m")
+	} else if showKlipyAttribution {
+		line += styleIf(state.useColor, " · Powered by KLIPY", "\x1b[90m")
 	}
 	writeLineAt(out, layout.statusRow, 1, line, statusWidth)
 	if showGiphyIcon && layout.cols >= logoCols {
@@ -737,15 +740,19 @@ func formatStatusLine(useColor bool, status string) string {
 }
 
 func drawSearch(out *bufio.Writer, state *appState, layout layout) {
-	pill := "[Search]"
+	label := "Search"
+	if search.ResolveSource(state.opts.Source) == "klipy" {
+		label = "Search KLIPY"
+	}
+	pill := "[" + label + "]"
 	query := state.query
 	if state.useColor {
 		bg := "\x1b[48;5;236m"
 		if state.mode == modeQuery {
-			pill = styleIf(true, " Search ", bg, "\x1b[1m", "\x1b[33m")
+			pill = styleIf(true, " "+label+" ", bg, "\x1b[1m", "\x1b[33m")
 			query += styleIf(true, "▍", "\x1b[36m")
 		} else {
-			pill = styleIf(true, " Search ", bg, "\x1b[90m")
+			pill = styleIf(true, " "+label+" ", bg, "\x1b[90m")
 		}
 	}
 	searchLine := pill + " " + query

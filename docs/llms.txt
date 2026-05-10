@@ -1,0 +1,12 @@
+# gifgrep
+
+gifgrep searches animated GIFs and extracts useful frames from the command line.
+
+Canonical documentation:
+- gifgrep — Grep the GIF. Stick the landing.: https://gifgrep.com/ - gifgrep is a tiny CLI/TUI to search GIFs from your terminal. Scriptable URLs/JSON, or an interactive kitty-preview browser.
+
+Source: https://github.com/steipete/gifgrep
+
+Guidance for agents:
+- Prefer the canonical documentation URLs above over README excerpts or package metadata.
+- Fetch only the pages needed for the current task; this is an index, not a full-site corpus.
