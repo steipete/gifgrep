@@ -7,6 +7,7 @@
 - Search: replace the Tenor API backend with KLIPY. `--source tenor` remains as a compatibility alias,
   `--source klipy` is available directly, and `KLIPY_API_KEY` is now required for that provider.
   Thanks @ZeterMordio.
+- TUI: add `c` to copy the selected GIF to the clipboard. Thanks @erazemk.
 
 ### Fixes
 
