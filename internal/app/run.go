@@ -20,7 +20,8 @@ func Run(args []string) int {
 	}
 
 	cli := &CLI{}
-	parser, err := kong.New(cli,
+	parser, err := kong.New(
+		cli,
 		kong.Name(model.AppName),
 		kong.Vars{"version": model.AppName + " " + model.Version},
 		kong.Help(helpPrinter),
