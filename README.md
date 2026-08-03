@@ -1,151 +1,126 @@
-# 🧲 gifgrep — Grep the GIF. Stick the landing.
+# gifgrep 🧲 — Grep the GIF. Stick the landing.
 
-gifgrep searches GIF providers and gives you two fast paths: scriptable CLI output for pipes, and an interactive TUI with inline previews.
+[![CI](https://img.shields.io/github/actions/workflow/status/steipete/gifgrep/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/steipete/gifgrep/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/steipete/gifgrep?style=flat-square)](https://github.com/steipete/gifgrep/releases/latest)
+[![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev/)
+[![License](https://img.shields.io/github/license/steipete/gifgrep?style=flat-square)](LICENSE)
+[![Homebrew](https://img.shields.io/badge/Homebrew-steipete%2Ftap-FBB040?style=flat-square&logo=homebrew&logoColor=black)](https://github.com/steipete/homebrew-tap/blob/main/Formula/gifgrep.rb)
+[![Docs](https://img.shields.io/badge/docs-gifgrep.com-6f42c1?style=flat-square)](https://gifgrep.com)
+
+gifgrep searches GIPHY and KLIPY from the terminal. It provides pipe-friendly CLI output and an interactive TUI with inline previews.
 
 <table>
   <tr>
     <td width="50%">
-      <img alt="gifgrep TUI" src="docs/assets/gifgrep-tui.png" />
+      <img alt="gifgrep TUI with an inline GIF preview" src="docs/assets/gifgrep-tui.png" />
       <br />
-      <sub><b>TUI</b> (animated inline previews)</sub>
+      <sub><b>TUI:</b> browse animated previews</sub>
     </td>
     <td width="50%">
-      <img alt="gifgrep CLI" src="docs/assets/gifgrep-cli.png" />
+      <img alt="gifgrep CLI search results" src="docs/assets/gifgrep-cli.png" />
       <br />
-      <sub><b>CLI</b> (pipeable output, optional still thumbs)</sub>
+      <sub><b>CLI:</b> print results for people or pipes</sub>
     </td>
   </tr>
 </table>
 
-CLI • TUI • Stills (PNG) • Kitty previews
+## Install
 
-Website: `https://gifgrep.com`
-
-Homebrew (recommended):
+Homebrew is the shortest path on macOS and Linux:
 
 ```bash
 brew install steipete/tap/gifgrep
 ```
 
-Go install:
+With Go 1.25 or newer:
 
 ```bash
 go install github.com/steipete/gifgrep/cmd/gifgrep@latest
 ```
 
-## Features
+Prebuilt macOS and Linux binaries are available from [GitHub Releases](https://github.com/steipete/gifgrep/releases/latest).
 
-- Scriptable search: readable plain output by default (TTY), plus `--format`, `--json`, `--max`, `--source`.
-- Inline thumbnails in search output: `--thumbs` (Kitty/iTerm2/Sixel; TTY only; still frame).
-- Download to `~/Downloads`: `--download` (CLI), `d` (TUI). Reveal with `--reveal` (CLI/TUI) or `f` (TUI).
-- TUI browser: inline preview, quick download, reveal last download.
-- Stills: `still` extracts one frame; `sheet` creates a PNG grid (`--frames`, `--cols`, `--padding`).
-- Color + logging: `--color/--no-color`, `--quiet`, `--verbose`.
-- Providers: `auto` (prefers Giphy when keyed, falls back to KLIPY), `klipy`, `tenor` (compatibility alias), `giphy`.
+## Quick start
 
-## Quickstart
+Set a provider key, then search or open the TUI:
 
 ```bash
-gifgrep cats --max 5
-gifgrep cats --format url | head -n 5
-gifgrep cats --download --max 1 --format url
-gifgrep search --json cats | jq '.[0].url'
+export GIPHY_API_KEY="your-key"
+gifgrep cats --max 3
+gifgrep cats --format url | head -n 1
 gifgrep tui "office handshake"
-
-gifgrep still ./clip.gif --at 1.5s -o still.png
-gifgrep sheet ./clip.gif --frames 9 --cols 3 -o sheet.png
 ```
 
-## Providers
+Use `KLIPY_API_KEY` instead to search KLIPY. With both keys configured, the default `auto` source tries GIPHY first and falls back to KLIPY if GIPHY fails.
 
-Select via `--source` (search + TUI):
+## Commands
 
-- `auto` (default): tries Giphy when `GIPHY_API_KEY` is set, then falls back to KLIPY when `KLIPY_API_KEY` is set.
-- `klipy`: requires `KLIPY_API_KEY`.
-- `tenor`: backwards-compatible alias for Klipy, using `KLIPY_API_KEY`.
-- `giphy`: requires `GIPHY_API_KEY`.
+| Command | Purpose |
+| --- | --- |
+| [`gifgrep <query>`](https://gifgrep.com/search) | Search and print plain text, URLs, Markdown, TSV, or JSON. |
+| [`gifgrep tui [query]`](https://gifgrep.com/tui) | Browse results with keyboard controls and inline previews. |
+| [`gifgrep still <gif>`](https://gifgrep.com/still) | Extract one frame from a local or remote GIF as PNG. |
+| [`gifgrep sheet <gif>`](https://gifgrep.com/sheet) | Create a PNG contact sheet from sampled frames. |
 
-## CLI
+Run `gifgrep --help` or open the [command reference](https://gifgrep.com/commands) for the full flag set.
 
-```text
-gifgrep [global flags] <query...>
-gifgrep search [flags] <query...>
-gifgrep tui [flags] [<query...>]
-gifgrep still <gif> --at <time> [-o <file>|-]
-gifgrep sheet <gif> [--frames <N>] [--cols <N>] [--padding <px>] [-o <file>|-]
+## Search and automation
+
+Search output adapts to its destination: a terminal gets a readable list, while a pipe gets one URL per line. Select an explicit format when a script needs a fixed contract:
+
+```bash
+gifgrep cats --format url --max 5
+gifgrep cats --json --max 5 | jq -r '.[].url'
 ```
 
-## TUI vs CLI (and why previews differ)
+`--download` saves results to `~/Downloads`; add `--reveal` to open the saved file in the platform file manager. The [search guide](https://gifgrep.com/search) covers formats and pipe recipes, and the [JSON reference](https://gifgrep.com/json) documents the structured result shape.
 
-- **CLI:** optimized for pipes. With `--thumbs`, it shows a *single still frame* inline (first decoded frame).
-- **TUI:** interactive browser. Inline previews are *animated* (full frame sequence).
-- Inline previews work in terminals that support inline images:
-  - **Kitty / Ghostty:** Kitty graphics protocol.
-  - **iTerm2:** OSC 1337 inline images.
-  - **Windows Terminal / WezTerm / Sixel-capable terminals:** Sixel graphics.
-  - **Truecolor terminals:** ANSI half-block fallback (`GIFGREP_INLINE=ansi`).
-- **Kitty:** uploads the full animation (terminal plays it).
-- **Ghostty:** software playback (gifgrep sends frames on a timer).
-- **Sixel:** software playback (gifgrep redraws frames into the same cell area).
-- **ANSI:** software playback (gifgrep redraws truecolor half-block frames).
+## Interactive browsing
 
-## How inline previews work (Kitty graphics protocol)
+`gifgrep tui` provides keyboard navigation, search editing, download, clipboard copy, and animated previews. Preview support depends on the terminal:
 
-gifgrep decodes GIFs to PNG frames and streams them into the terminal via Kitty graphics escape sequences:
+| Terminal | Preview path |
+| --- | --- |
+| Kitty, Ghostty | Kitty graphics protocol |
+| iTerm2 | OSC 1337 inline images |
+| Windows Terminal, WezTerm, Sixel terminals | Sixel |
+| Truecolor terminals | ANSI half-block fallback when forced |
 
-- Base64-encode PNG bytes and chunk them (4096 chars) into `ESC _G ... ESC \\` payloads.
-- `a=T` uploads the base image; `a=f` appends animation frames (with per-frame delay).
-- `a=a` sets animation timing / starts playback; `a=p` places the image in a cell rectangle.
-- Old previews get cleaned up via `a=d` (delete by image id).
+See [TUI controls](https://gifgrep.com/tui) and [inline preview behavior](https://gifgrep.com/previews) for protocol and configuration details.
 
-## iTerm2 inline images
+## Local frame extraction
 
-iTerm2 uses a different protocol (OSC 1337). See `docs/iterm.md`.
+`still` and `sheet` work without a provider key:
 
-## Sixel inline images
+```bash
+gifgrep still clip.gif --at 1.5s -o still.png
+gifgrep sheet clip.gif --frames 9 --cols 3 -o sheet.png
+```
 
-Sixel-capable terminals use DEC Sixel graphics. See `docs/sixel.md`.
+Both commands accept a local path or URL. Pass `-o -` to write PNG bytes to stdout.
 
-## ANSI fallback
+## Providers and configuration
 
-`GIFGREP_INLINE=ansi` renders GIF frames as truecolor half-blocks. It is lower
-resolution than a bitmap protocol, but works in plain terminals that support
-24-bit color.
+| Setting | Purpose |
+| --- | --- |
+| `GIPHY_API_KEY` | Search GIPHY directly or make it the preferred `auto` provider. |
+| `KLIPY_API_KEY` | Search KLIPY directly and provide the `auto` fallback. |
+| `GIFGREP_INLINE` | Override preview detection with `kitty`, `iterm`, `sixel`, `ansi`, or `none`. |
+| `GIFGREP_SOFTWARE_ANIM` | Force or disable software-driven preview animation. |
+| `GIFGREP_CELL_ASPECT` | Adjust inline preview cell geometry. |
 
-## JSON output
-
-`--json` prints an array with: `id`, `title`, `url`, `preview_url`, `tags`, `width`, `height`.
-
-## Environment
-
-- `KLIPY_API_KEY` (required for `--source klipy` / `--source tenor`)
-- `GIPHY_API_KEY` (required for `--source giphy`)
-- `auto` uses Giphy first when keyed, then KLIPY if Giphy is unavailable.
-- `GIFGREP_INLINE=kitty|iterm|sixel|ansi|none` (override terminal detection)
-- `GIFGREP_SOFTWARE_ANIM=1` (force software playback; default on Ghostty)
-- `GIFGREP_CELL_ASPECT=0.5` (tweak preview cell geometry)
-
-## Test fixtures licensing
-
-See `docs/gif-sources.md`.
+Provider selection and fallback behavior are documented in the [provider guide](https://gifgrep.com/providers/).
 
 ## Development
 
 ```bash
 make test
-make gifgrep GIFGREP_ARGS="--help"
-make gifgrep -- --version
-make gifgrep tui skynet
+make check
+make gifgrep -- --help
 ```
 
-Ghostty web snapshot:
+The generated GitHub Pages site lives in `docs/`. See [docs/development.md](docs/development.md) for the documentation and Ghostty snapshot workflows. Test GIF fixture sources and licenses are listed in [docs/gif-sources.md](docs/gif-sources.md).
 
-```bash
-npm install
-npx playwright install chromium
-make snap
-```
+## License
 
-## GitHub Pages
-
-Landing page lives in `docs/` (GitHub Pages -> `main` -> `/docs`).
+MIT. See [LICENSE](LICENSE).
