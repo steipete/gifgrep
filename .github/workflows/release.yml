@@ -36,7 +36,7 @@ jobs:
           ref: ${{ inputs.tag || github.ref }}
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
 
@@ -59,7 +59,7 @@ jobs:
           sha256sum "dist/gifgrep_${version}_${target}.tar.gz" > "dist/gifgrep_${version}_${target}.tar.gz.sha256"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: gifgrep-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
@@ -71,7 +71,7 @@ jobs:
     needs: build
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: artifacts
 
@@ -83,7 +83,7 @@ jobs:
           find artifacts -type f -maxdepth 3 -print0 | xargs -0 -I{} cp {} dist/
 
       - name: Upload release assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
           files: dist/*

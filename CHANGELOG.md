@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Dev
+
+- Update Go dependencies and the Go 1.27.0 toolchain, refresh Playwright with an npm lockfile, and update CI tools and GitHub Actions.
+
 ### Docs
 
 - Rewrite the README around installation, first use, and links to the full documentation.
