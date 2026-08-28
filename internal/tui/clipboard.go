@@ -53,7 +53,7 @@ func gifPathForResult(state *appState, item model.Result) string {
 
 	// Write cached raw GIF bytes to a temp file.
 	key := resultKey(item)
-	if entry, ok := state.cache[key]; ok && len(entry.RawGIF) > 0 {
+	if entry, ok := state.cache[item.PreviewURL]; ok && len(entry.RawGIF) > 0 {
 		dir, err := ensureTempDir(state)
 		if err != nil {
 			return ""

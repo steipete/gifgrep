@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- TUI: fix clipboard copy hanging on background clipboard owners, prefer `wl-copy` on Wayland while preserving `xclip` on X11, and allow copying loaded previews before prefetch completes. Thanks @kikeijuu (#9).
+
 ### Dev
 
 - Update Go dependencies and the Go 1.27.0 toolchain, refresh Playwright with an npm lockfile, and update CI tools and GitHub Actions.

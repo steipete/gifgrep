@@ -2,7 +2,6 @@ package app
 
 import (
 	"bytes"
-	"io"
 	"os"
 	"strings"
 	"testing"
@@ -47,10 +46,15 @@ func TestRunSearchJSON(t *testing.T) {
 
 func TestHelpOutput(t *testing.T) {
 	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
+	// A pipe can fill before Run returns and the test starts reading.
+	w, err := os.CreateTemp(t.TempDir(), "help")
+	if err != nil {
+		t.Fatal(err)
+	}
 	os.Stdout = w
 	t.Cleanup(func() {
 		os.Stdout = oldStdout
+		_ = w.Close()
 	})
 
 	code := Run([]string{"--help"})
@@ -58,7 +62,10 @@ func TestHelpOutput(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("expected exit 0")
 	}
-	out, _ := io.ReadAll(r)
+	out, err := os.ReadFile(w.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
 	text := string(out)
 	if !strings.Contains(text, "Examples:") {
 		t.Fatalf("expected Examples section")

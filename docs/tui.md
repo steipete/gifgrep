@@ -26,8 +26,11 @@ gifgrep tui --source giphy cats
 | `/`      | Edit search query.                                  |
 | `↑` `↓`  | Move selection.                                     |
 | `d`      | Download current selection to `~/Downloads`.        |
+| `c`      | Copy the selected GIF to the clipboard.              |
 | `f`      | Reveal last download in Finder / Explorer / Files.  |
 | `q`      | Quit.                                               |
+
+On Linux, clipboard copy prefers `wl-copy` in Wayland sessions (`WAYLAND_DISPLAY` or `XDG_SESSION_TYPE=wayland`) and `xclip` otherwise. Install `wl-clipboard` for Wayland or `xclip` for X11; if the preferred tool is missing, gifgrep uses the other installed tool. macOS uses its built-in clipboard integration.
 
 ## Inline previews
 

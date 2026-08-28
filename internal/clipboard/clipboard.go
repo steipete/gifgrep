@@ -2,7 +2,6 @@ package clipboard
 
 import (
 	"errors"
-	"io"
 	"os"
 	"os/exec"
 	"runtime"
@@ -27,8 +26,7 @@ func CopyFile(path string) error {
 		defer func() { _ = f.Close() }()
 		cmd.Stdin = f
 	}
-	cmd.Stdout = io.Discard
-	cmd.Stderr = io.Discard
+	// Nil outputs use the null device, not pipes kept open by clipboard daemons.
 	return cmd.Run()
 }
 
@@ -52,11 +50,16 @@ end run`,
 			},
 		}, nil
 	default:
-		if _, err := lookPath("xclip"); err == nil {
-			return commandSpec{name: "xclip", args: []string{"-selection", "clipboard", "-t", "image/gif", "-i", path}}, nil
+		xclip := commandSpec{name: "xclip", args: []string{"-selection", "clipboard", "-t", "image/gif", "-i", path}}
+		wlCopy := commandSpec{name: "wl-copy", args: []string{"--type", "image/gif"}, stdinPath: path}
+		commands := []commandSpec{xclip, wlCopy}
+		if os.Getenv("WAYLAND_DISPLAY") != "" || os.Getenv("XDG_SESSION_TYPE") == "wayland" {
+			commands = []commandSpec{wlCopy, xclip}
 		}
-		if _, err := lookPath("wl-copy"); err == nil {
-			return commandSpec{name: "wl-copy", args: []string{"--type", "image/gif"}, stdinPath: path}, nil
+		for _, command := range commands {
+			if _, err := lookPath(command.name); err == nil {
+				return command, nil
+			}
 		}
 		return commandSpec{}, errors.New("no clipboard tool found (need xclip or wl-copy)")
 	}

@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"github.com/steipete/gifgrep/internal/model"
+	"github.com/steipete/gifgrep/internal/termcaps"
+	"github.com/steipete/gifgrep/internal/testutil"
 )
 
 func TestCopySelectedUsesTempPath(t *testing.T) {
@@ -81,6 +83,7 @@ func TestCopySelectedUsesSavedPath(t *testing.T) {
 }
 
 func TestCopySelectedWritesCacheToTemp(t *testing.T) {
+	data := testutil.MakeTestGIF()
 	orig := copyToClipboardFn
 	t.Cleanup(func() { copyToClipboardFn = orig })
 
@@ -91,16 +94,20 @@ func TestCopySelectedWritesCacheToTemp(t *testing.T) {
 	}
 
 	state := &appState{
-		results:    []model.Result{{ID: "1", URL: "https://example.test/1.gif", Title: "one"}},
+		results:    []model.Result{{ID: "1", URL: "https://example.test/1.gif", PreviewURL: "https://example.test/preview.gif", Title: "one"}},
 		selected:   0,
 		lastRows:   24,
 		lastCols:   80,
 		savedPaths: map[string]string{},
 		tempPaths:  map[string]string{},
 		tempDir:    t.TempDir(),
-		cache: map[string]*gifCacheEntry{
-			"id:1": {RawGIF: []byte("GIF89a")},
-		},
+		inline:     termcaps.InlineKitty,
+	}
+	testutil.WithTransport(t, &testutil.FakeTransport{GIFData: data}, func() {
+		loadSelectedImage(state)
+	})
+	if state.currentAnim == nil {
+		t.Fatal("expected a loaded preview")
 	}
 
 	out := bufio.NewWriter(bytes.NewBuffer(nil))
@@ -109,12 +116,12 @@ func TestCopySelectedWritesCacheToTemp(t *testing.T) {
 	if copied == "" {
 		t.Fatal("expected non-empty path")
 	}
-	data, err := os.ReadFile(copied)
+	copiedData, err := os.ReadFile(copied)
 	if err != nil {
 		t.Fatalf("ReadFile: %v", err)
 	}
-	if string(data) != "GIF89a" {
-		t.Fatalf("unexpected data: %q", data)
+	if !bytes.Equal(copiedData, data) {
+		t.Fatal("clipboard did not receive the loaded preview")
 	}
 	if state.headerFlash != "Copied to clipboard" {
 		t.Fatalf("expected flash 'Copied to clipboard', got %q", state.headerFlash)
