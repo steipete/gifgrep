@@ -2,6 +2,10 @@
 
 ## 0.3.2 - Unreleased
 
+### Dependencies
+
+- Update the Go toolchain to 1.27.1 and go-runewidth to 0.0.29, retaining Go 1.25 as the minimum supported version.
+
 ## 0.3.1 - 2026-08-28
 
 ### Highlights

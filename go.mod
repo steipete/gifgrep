@@ -2,11 +2,11 @@ module github.com/steipete/gifgrep
 
 go 1.25.0
 
-toolchain go1.27.0
+toolchain go1.27.1
 
 require (
 	github.com/alecthomas/kong v1.16.1
-	github.com/mattn/go-runewidth v0.0.28
+	github.com/mattn/go-runewidth v0.0.29
 	github.com/mattn/go-sixel v0.0.12
 	golang.org/x/term v0.45.0
 )
