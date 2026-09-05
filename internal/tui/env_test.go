@@ -16,7 +16,7 @@ func TestRunTUIWithQuit(t *testing.T) {
 	t.Setenv("GIFGREP_INLINE", "kitty")
 	var restored bool
 	env := Env{
-		In:  bytes.NewReader([]byte("q")),
+		In:  bytes.NewReader([]byte{0x03}),
 		Out: io.Discard,
 		FD:  1,
 		IsTerminal: func(int) bool {

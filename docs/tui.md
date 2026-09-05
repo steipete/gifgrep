@@ -12,7 +12,7 @@ gifgrep tui [<query> ...] [flags]
 ```
 
 ```bash
-gifgrep tui                    # launches with empty query, hit / to search
+gifgrep tui                    # launches ready to type a search query
 gifgrep tui cats               # initial query
 gifgrep tui --source giphy cats
 ```
@@ -28,7 +28,8 @@ gifgrep tui --source giphy cats
 | `d`      | Download current selection to `~/Downloads`.        |
 | `c`      | Copy the selected GIF to the clipboard.              |
 | `f`      | Reveal last download in Finder / Explorer / Files.  |
-| `q`      | Quit.                                               |
+| `q`      | Quit while browsing; type `q` while editing a query.  |
+| `Ctrl-C` | Quit from either mode.                              |
 
 On Linux, clipboard copy prefers `wl-copy` in Wayland sessions (`WAYLAND_DISPLAY` or `XDG_SESSION_TYPE=wayland`) and `xclip` otherwise. Install `wl-clipboard` for Wayland or `xclip` for X11; if the preferred tool is missing, gifgrep uses the other installed tool. macOS uses its built-in clipboard integration.
 

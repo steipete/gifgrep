@@ -350,10 +350,6 @@ func handleInput(state *appState, ev inputEvent, out *bufio.Writer, prefetchCh c
 	if ev.kind == keyCtrlC {
 		return true
 	}
-	if ev.kind == keyRune && ev.ch == 'q' {
-		return true
-	}
-
 	switch state.mode {
 	case modeQuery:
 		return handleQueryInput(state, ev, out, prefetchCh)
@@ -428,6 +424,8 @@ func handleBrowseInput(state *appState, ev inputEvent, out *bufio.Writer) bool {
 			return false
 		}
 		switch ev.ch {
+		case 'q':
+			return true
 		case 'c':
 			copySelected(state, out)
 			return false
@@ -783,6 +781,10 @@ func drawHints(out *bufio.Writer, state *appState, layout layout) {
 		}
 		return styleIf(true, key, "\x1b[1m", "\x1b[36m") + " " + styleIf(true, label, "\x1b[37m")
 	}
+	quitKey := "q"
+	if state.mode == modeQuery {
+		quitKey = "Ctrl-C"
+	}
 	hints := strings.Join([]string{
 		formatHint("⏎", "Search"),
 		formatHint("/", "Edit"),
@@ -790,7 +792,7 @@ func drawHints(out *bufio.Writer, state *appState, layout layout) {
 		formatHint("d", "Download"),
 		formatHint("c", "Copy"),
 		formatHint("f", "Reveal"),
-		formatHint("q", "Quit"),
+		formatHint(quitKey, "Quit"),
 	}, "  ")
 	// Hints live below the content area; center across the full terminal width,
 	// even when the content is split (preview left / list right).
