@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.3.2 - Unreleased
+## 0.3.2 - 2026-09-05
+
+### Highlights
+
+Search queries containing `q` now work in the TUI without quitting.
 
 ### Fixes
 
