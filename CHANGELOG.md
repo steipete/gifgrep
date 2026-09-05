@@ -2,6 +2,10 @@
 
 ## 0.3.2 - Unreleased
 
+### Fixes
+
+- TUI: allow search queries containing `q` without quitting; keep `q` to quit while browsing and Ctrl-C to quit from either mode.
+
 ### Dependencies
 
 - Update the Go toolchain to 1.27.1 and go-runewidth to 0.0.29, retaining Go 1.25 as the minimum supported version.

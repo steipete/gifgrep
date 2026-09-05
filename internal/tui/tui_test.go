@@ -162,7 +162,7 @@ func TestHandleInputAndLoad(t *testing.T) {
 			t.Fatalf("expected backspace to remove query")
 		}
 
-		state.mode = modeQuery
+		state.mode = modeBrowse
 		if !handleInput(state, inputEvent{kind: keyRune, ch: 'q'}, out, nil) {
 			t.Fatalf("expected quit on q")
 		}
@@ -181,6 +181,34 @@ func TestHandleInputAndLoad(t *testing.T) {
 			t.Fatalf("expected selection to stay at end")
 		}
 	})
+}
+
+func TestHandleInputQueryKeepsQ(t *testing.T) {
+	state := newAppState(termcaps.InlineANSI, model.Options{})
+	state.renderDirty = false
+	var buf bytes.Buffer
+	out := bufio.NewWriter(&buf)
+	for _, ch := range "bbq" {
+		if handleInput(state, inputEvent{kind: keyRune, ch: ch}, out, nil) {
+			t.Fatalf("typing %q quit while editing the query", ch)
+		}
+	}
+	if state.query != "bbq" {
+		t.Fatalf("query = %q, want bbq", state.query)
+	}
+	if !state.renderDirty {
+		t.Fatal("query edit should trigger a redraw")
+	}
+	if !handleInput(state, inputEvent{kind: keyCtrlC}, out, nil) {
+		t.Fatal("Ctrl-C should still quit while editing the query")
+	}
+	state.mode = modeBrowse
+	if !handleInput(state, inputEvent{kind: keyRune, ch: 'q'}, out, nil) {
+		t.Fatal("q should still quit while browsing")
+	}
+	if !handleInput(state, inputEvent{kind: keyCtrlC}, out, nil) {
+		t.Fatal("Ctrl-C should still quit while browsing")
+	}
 }
 
 func TestReadInput(t *testing.T) {

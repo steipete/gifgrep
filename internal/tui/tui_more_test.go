@@ -23,7 +23,7 @@ func TestRunTUIWithDefaultsNotTerminal(t *testing.T) {
 func TestRunTUIWithNoRestore(t *testing.T) {
 	t.Setenv("GIFGREP_INLINE", "kitty")
 	env := Env{
-		In:         bytes.NewReader([]byte("q")),
+		In:         bytes.NewReader([]byte{0x03}),
 		Out:        io.Discard,
 		FD:         1,
 		IsTerminal: func(int) bool { return true },
@@ -56,7 +56,7 @@ func TestRunTUIWithSearchError(t *testing.T) {
 func TestRunTUIWithSizeError(t *testing.T) {
 	t.Setenv("GIFGREP_INLINE", "kitty")
 	env := Env{
-		In:         bytes.NewReader([]byte("q")),
+		In:         bytes.NewReader([]byte{0x03}),
 		Out:        io.Discard,
 		FD:         1,
 		IsTerminal: func(int) bool { return true },
