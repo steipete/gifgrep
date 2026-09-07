@@ -1,6 +1,18 @@
 # Changelog
 
-## 0.3.3 - Unreleased
+## 0.4.0 - Unreleased
+
+### Highlights
+
+Reuse downloaded GIFs across CLI and TUI sessions with an opt-in persistent cache.
+
+### Features
+
+- Downloads: add `--cache` / `GIFGREP_CACHE` with a configurable location, seven-day expiry, and a 100 MiB size budget; keep explicit saves in `~/Downloads`. Thanks @grabear (#10).
+
+### Fixes
+
+- Downloads: reserve filenames atomically so simultaneous saves cannot overwrite each other.
 
 ## 0.3.2 - 2026-09-05
 
