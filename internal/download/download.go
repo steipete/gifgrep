@@ -16,7 +16,7 @@ import (
 	"github.com/steipete/gifgrep/internal/model"
 )
 
-func ToDownloads(item model.Result) (string, error) {
+func ToDownloads(item model.Result, cache model.CacheOptions) (string, error) {
 	dir, err := DefaultDir()
 	if err != nil {
 		return "", err
@@ -25,13 +25,31 @@ func ToDownloads(item model.Result) (string, error) {
 		return "", err
 	}
 	filename := filenameForResult(item)
-	finalPath, err := uniqueFilePath(dir, filename)
+	finalPath, err := reserveFilePath(dir, filename)
 	if err != nil {
 		return "", err
+	}
+	saved := false
+	defer func() {
+		if !saved {
+			_ = os.Remove(finalPath)
+		}
+	}()
+	cachePath := cachedDownloadPath(item.URL, cache)
+	if cachePath != "" {
+		pruneDownloadCache(filepath.Dir(cachePath), cache)
+	}
+	if cachePath != "" && copyCachedDownload(cachePath, finalPath, cache) == nil {
+		saved = true
+		return finalPath, nil
 	}
 	client := &http.Client{Timeout: 20 * time.Second}
 	if err := downloadGIFToFile(client, item.URL, finalPath); err != nil {
 		return "", err
+	}
+	saved = true
+	if cachePath != "" {
+		storeCachedDownload(finalPath, cachePath, cache)
 	}
 	return finalPath, nil
 }
@@ -120,27 +138,31 @@ func sanitizeFilename(name string) string {
 	return out
 }
 
-func uniqueFilePath(dir, filename string) (string, error) {
-	fullPath := filepath.Join(dir, filename)
-	_, err := os.Stat(fullPath)
-	if err == nil {
-		base := strings.TrimSuffix(filename, filepath.Ext(filename))
-		ext := filepath.Ext(filename)
-		if ext == "" {
-			ext = ".gif"
+func reserveFilePath(dir, filename string) (string, error) {
+	base := strings.TrimSuffix(filename, filepath.Ext(filename))
+	ext := filepath.Ext(filename)
+	for i := 0; i < 1000; i++ {
+		name := filename
+		if i > 0 {
+			name = fmt.Sprintf("%s-%d%s", base, i, ext)
 		}
-		for i := 1; i < 1000; i++ {
-			candidate := filepath.Join(dir, fmt.Sprintf("%s-%d%s", base, i, ext))
-			if _, err := os.Stat(candidate); errors.Is(err, os.ErrNotExist) {
-				return candidate, nil
-			}
+		candidate := filepath.Join(dir, name)
+		// Reserve before fetching/copying so simultaneous saves cannot overwrite
+		// each other. The caller removes the reservation on failure.
+		file, err := os.OpenFile(candidate, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
+		if errors.Is(err, os.ErrExist) {
+			continue
 		}
-		return "", errors.New("could not pick filename")
+		if err != nil {
+			return "", err
+		}
+		if err := file.Close(); err != nil {
+			_ = os.Remove(candidate)
+			return "", err
+		}
+		return candidate, nil
 	}
-	if errors.Is(err, os.ErrNotExist) {
-		return fullPath, nil
-	}
-	return "", err
+	return "", errors.New("could not pick filename")
 }
 
 func downloadGIFToFile(client *http.Client, gifURL, dest string) error {

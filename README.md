@@ -75,6 +75,8 @@ gifgrep cats --json --max 5 | jq -r '.[].url'
 
 `--download` saves results to `~/Downloads`; add `--reveal` to open the saved file in the platform file manager. The [search guide](https://gifgrep.com/search) covers formats and pipe recipes, and the [JSON reference](https://gifgrep.com/json) documents the structured result shape.
 
+Add `--cache` to reuse downloaded GIFs across CLI and TUI sessions. Saves still go to `~/Downloads`; the optional cache defaults to seven days and 100 MiB. See [download caching](https://gifgrep.com/search#download-cache) for location and limit options.
+
 ## Interactive browsing
 
 `gifgrep tui` provides keyboard navigation, search editing, download, clipboard copy, and animated previews. Preview support depends on the terminal:

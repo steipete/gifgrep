@@ -40,6 +40,8 @@ gifgrep <command> [flags]
 |---------------------------|----------------------------------------------------------|
 | `GIPHY_API_KEY`           | Required for `--source giphy` (and preferred by `auto`). |
 | `KLIPY_API_KEY`           | Required for `--source klipy` / `--source tenor`.        |
+| `GIFGREP_CACHE`          | `1` to enable persistent explicit-download reuse in search/TUI; off by default. |
+| `GIFGREP_CACHE_DIR`      | Cache root; requires `--cache` or `GIFGREP_CACHE=1`. See [download cache](search.md#download-cache). |
 | `GIFGREP_SOFTWARE_ANIM`   | `1` to force software animation; `0` to disable.         |
 | `GIFGREP_CELL_ASPECT`     | Tweak preview cell aspect ratio (default `0.5`).         |
 | `GIFGREP_INLINE`          | `kitty` / `iterm` / `sixel` / `ansi` / `off` — override protocol detection. |

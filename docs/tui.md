@@ -33,6 +33,8 @@ gifgrep tui --source giphy cats
 
 On Linux, clipboard copy prefers `wl-copy` in Wayland sessions (`WAYLAND_DISPLAY` or `XDG_SESSION_TYPE=wayland`) and `xclip` otherwise. Install `wl-clipboard` for Wayland or `xclip` for X11; if the preferred tool is missing, gifgrep uses the other installed tool. macOS uses its built-in clipboard integration.
 
+Add `--cache` (or set `GIFGREP_CACHE=1`) to reuse explicit downloads across sessions, including GIFs saved by the CLI. The `d`/`f` actions still save to `~/Downloads`. Cache location, age, and size flags match the [download cache options](search.md#download-cache); previews and prefetches remain temporary.
+
 ## Inline previews
 
 The TUI streams animated previews using the [Kitty graphics protocol](previews.md#kitty-graphics) on Kitty/Ghostty, [OSC 1337](previews.md#iterm2-osc-1337) on iTerm2, Sixel where available, or a truecolor ANSI fallback when forced.

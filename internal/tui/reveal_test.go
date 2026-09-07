@@ -25,7 +25,7 @@ func TestRevealSelectedUsesExistingDownload(t *testing.T) {
 	})
 
 	downloadCalled := false
-	downloadToDownloadsFn = func(model.Result) (string, error) {
+	downloadToDownloadsFn = func(model.Result, model.CacheOptions) (string, error) {
 		downloadCalled = true
 		return "", errors.New("unexpected download")
 	}
@@ -65,7 +65,11 @@ func TestRevealSelectedDownloadsWhenMissing(t *testing.T) {
 
 	downloadCalled := false
 	var downloadedPath string
-	downloadToDownloadsFn = func(model.Result) (string, error) {
+	cache := model.CacheOptions{Enabled: true, Dir: t.TempDir(), MaxBytes: 42}
+	downloadToDownloadsFn = func(_ model.Result, opts model.CacheOptions) (string, error) {
+		if opts != cache {
+			t.Fatalf("download cache options not propagated: %+v", opts)
+		}
 		downloadCalled = true
 		tmp, err := os.CreateTemp(t.TempDir(), "gifgrep-*.gif")
 		if err != nil {
@@ -83,6 +87,7 @@ func TestRevealSelectedDownloadsWhenMissing(t *testing.T) {
 	}
 
 	state := &appState{
+		opts:       model.Options{Cache: cache},
 		results:    []model.Result{{ID: "1", URL: "https://example.test/1.gif", Title: "one"}},
 		selected:   0,
 		lastRows:   24,

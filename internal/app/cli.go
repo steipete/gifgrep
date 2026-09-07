@@ -52,6 +52,8 @@ func (g Globals) toOptions() model.Options {
 }
 
 type SearchCmd struct {
+	CacheFlags `embed:""`
+
 	Source   string `help:"Source to search." enum:"auto,klipy,tenor,giphy" default:"auto"`
 	Max      int    `help:"Max results to fetch." name:"max" short:"m" default:"20"`
 	JSON     bool   `help:"Emit JSON array of results."`
@@ -77,10 +79,17 @@ func (c *SearchCmd) Run(ctx *kong.Context, cli *CLI) error {
 	opts.Format = c.Format
 	opts.Thumbs = c.Thumbs
 	opts.Download = c.Download
+	cache, err := c.options()
+	if err != nil {
+		return err
+	}
+	opts.Cache = cache
 	return runSearch(ctx.Stdout, ctx.Stderr, opts, query)
 }
 
 type TUICmd struct {
+	CacheFlags `embed:""`
+
 	Source string `help:"Source to search." enum:"auto,klipy,tenor,giphy" default:"auto"`
 	Max    int    `help:"Max results to fetch." name:"max" short:"m" default:"20"`
 
@@ -91,6 +100,11 @@ func (c *TUICmd) Run(_ *kong.Context, cli *CLI) error {
 	opts := cli.Globals.toOptions()
 	opts.Limit = c.Max
 	opts.Source = c.Source
+	cache, err := c.options()
+	if err != nil {
+		return err
+	}
+	opts.Cache = cache
 
 	query := strings.TrimSpace(strings.Join(c.Query, " "))
 	return tui.Run(opts, query)
@@ -197,7 +211,7 @@ func downloadSearchResults(results []model.Result, opts model.Options, stderr io
 		if res.URL == "" {
 			continue
 		}
-		savedPath, err := download.ToDownloads(res)
+		savedPath, err := download.ToDownloads(res, opts.Cache)
 		if err != nil {
 			return err
 		}

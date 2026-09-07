@@ -41,11 +41,11 @@ func TestFilenameForResult(t *testing.T) {
 	}
 }
 
-func TestUniqueFilePath(t *testing.T) {
+func TestReserveFilePath(t *testing.T) {
 	t.Parallel()
 
 	dir := t.TempDir()
-	p1, err := uniqueFilePath(dir, "x.gif")
+	p1, err := reserveFilePath(dir, "x.gif")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,7 +55,7 @@ func TestUniqueFilePath(t *testing.T) {
 	if err := os.WriteFile(p1, []byte("x"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	p2, err := uniqueFilePath(dir, "x.gif")
+	p2, err := reserveFilePath(dir, "x.gif")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func TestToDownloadsUsesHome(t *testing.T) {
 		Title: "a",
 		URL:   srv.URL,
 	}
-	got, err := ToDownloads(res)
+	got, err := ToDownloads(res, model.CacheOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}

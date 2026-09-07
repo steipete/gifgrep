@@ -26,6 +26,7 @@ type Options struct {
 	Download bool
 	Format   string
 	Thumbs   string
+	Cache    CacheOptions
 
 	JSON   bool
 	Number bool
@@ -39,4 +40,11 @@ type Options struct {
 	StillsCols    int
 	StillsPadding int
 	OutPath       string
+}
+
+type CacheOptions struct {
+	Enabled  bool
+	Dir      string
+	MaxAge   time.Duration
+	MaxBytes int64
 }

@@ -208,6 +208,7 @@ func searchHelpExtras() []string {
 		"  Default (--format auto): plain (TTY), url (pipe).",
 		"  Use --format plain|tsv|md|url|comment|json, or --json.",
 		"  Use --download to save results to ~/Downloads (combine with --reveal).",
+		"  Add --cache to reuse explicit downloads across CLI/TUI sessions.",
 		"",
 		"Examples:",
 		"  gifgrep cats | head -n 5",

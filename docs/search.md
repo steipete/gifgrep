@@ -71,7 +71,32 @@ gifgrep cats --download --max 3
 gifgrep cats --download --reveal --max 1   # also opens Finder/Explorer
 ```
 
-Downloads land in `~/Downloads`. Filenames are derived from the result title (sanitized) plus the provider's id.
+Downloads land in `~/Downloads`. Filenames use the sanitized result title, falling back to its id or URL; repeated saves receive numeric suffixes.
+
+## Download cache
+
+Use `--cache` to reuse previously downloaded GIFs across CLI and TUI sessions:
+
+```bash
+gifgrep cats --download --max 1 --cache
+gifgrep tui cats --cache
+GIFGREP_CACHE=1 GIFGREP_CACHE_DIR=/path/to/cache gifgrep cats --download
+```
+
+Explicit saves still create separate files in `~/Downloads`, including on a cache hit. Caching is off by default; setting a cache directory alone does not enable it. `--cache=false` overrides `GIFGREP_CACHE=1`.
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `--cache` | `false` | Enable persistent download reuse; also `GIFGREP_CACHE`. |
+| `--cache-dir` | OS user cache directory + `gifgrep` | Cache root; also `GIFGREP_CACHE_DIR`. The flag takes precedence. |
+| `--cache-max-age` | `168h` | Expire entries seven days after download; `0` disables expiry. |
+| `--cache-max-bytes` | `104857600` | Keep up to 100 MiB of cached downloads; `0` disables the size limit. |
+
+The default root is `~/Library/Caches/gifgrep` on macOS and `$XDG_CACHE_HOME/gifgrep` (or `~/.cache/gifgrep`) on Linux. Entries live in its `downloads-v1` subdirectory. Remove that subdirectory to clear the cache without touching saved downloads.
+
+Cache entries contain downloaded GIF bytes under a hash of the complete media URL, so different provider hosts and media variants stay separate. Queries, titles, and provider metadata are not stored. Expired entries and oldest downloads over the size budget are removed when saving; reading an entry does not extend its lifetime. Files larger than the budget are saved normally but not cached. Limits are best effort during concurrent saves, and cache failures fall back to ordinary downloading.
+
+Search still calls the provider API and needs a key. This cache applies to explicit downloads (`--download`, or TUI `d`/`f`); preview/prefetch data stays temporary. It does not provide offline search, a local GIF library, or favorites.
 
 ## Pipe recipes
 

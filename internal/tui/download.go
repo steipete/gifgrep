@@ -31,7 +31,7 @@ func downloadSelected(state *appState, out *bufio.Writer, revealAfter bool) {
 	render(state, out, state.lastRows, state.lastCols)
 	_ = out.Flush()
 
-	filePath, err := downloadToDownloadsFn(item)
+	filePath, err := downloadToDownloadsFn(item, state.opts.Cache)
 	if err != nil {
 		flashHeader(state, "Download error: "+err.Error())
 		state.renderDirty = true
