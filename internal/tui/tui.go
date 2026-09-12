@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/steipete/gifgrep/gifdecode"
 	"github.com/steipete/gifgrep/internal/ansi"
@@ -307,11 +309,11 @@ func readInput(r io.Reader, ch chan<- inputEvent, stop <-chan struct{}) {
 		default:
 		}
 
-		b, err := reader.ReadByte()
+		r, size, err := reader.ReadRune()
 		if err != nil {
 			return
 		}
-		switch b {
+		switch r {
 		case 0x03:
 			ch <- inputEvent{kind: keyCtrlC}
 		case '\r', '\n':
@@ -339,8 +341,8 @@ func readInput(r io.Reader, ch chan<- inputEvent, stop <-chan struct{}) {
 				ch <- inputEvent{kind: keyEsc}
 			}
 		default:
-			if b >= 0x20 && b < 0x7f {
-				ch <- inputEvent{kind: keyRune, ch: rune(b)}
+			if !unicode.IsControl(r) && (r != utf8.RuneError || size > 1) {
+				ch <- inputEvent{kind: keyRune, ch: r}
 			}
 		}
 	}
@@ -367,7 +369,8 @@ func handleQueryInput(state *appState, ev inputEvent, out *bufio.Writer, prefetc
 		state.renderDirty = true
 	case keyBackspace:
 		if state.query != "" {
-			state.query = state.query[:len(state.query)-1]
+			_, size := utf8.DecodeLastRuneInString(state.query)
+			state.query = state.query[:len(state.query)-size]
 			state.renderDirty = true
 		}
 	case keyEnter:
