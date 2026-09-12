@@ -2,6 +2,18 @@
 
 ## 0.4.1 - Unreleased
 
+### Highlights
+
+Type and edit Unicode search queries in the TUI without losing accented letters, CJK text, or emoji.
+
+### Fixes
+
+- TUI: accept UTF-8 search input and remove complete Unicode code points with Backspace instead of dropping or corrupting non-ASCII text.
+
+### Dependencies
+
+- Update go-runewidth to 0.0.30 and the CI formatter to gofumpt 0.12.0, retaining Go 1.25 as the minimum supported version.
+
 ## 0.4.0 - 2026-09-07
 
 ### Highlights
