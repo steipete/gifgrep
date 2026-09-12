@@ -76,7 +76,11 @@ func TestRunArgs(t *testing.T) {
 		}
 
 		oldStdout := os.Stdout
-		r, w, _ := os.Pipe()
+		w, err := os.CreateTemp(t.TempDir(), "stdout")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer func() { _ = w.Close() }()
 		os.Stdout = w
 		t.Cleanup(func() {
 			os.Stdout = oldStdout
@@ -87,7 +91,10 @@ func TestRunArgs(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("expected exit 0")
 		}
-		out, _ := io.ReadAll(r)
+		out, err := os.ReadFile(w.Name())
+		if err != nil {
+			t.Fatal(err)
+		}
 		if !bytes.HasPrefix(out, []byte{0x89, 'P', 'N', 'G'}) {
 			t.Fatalf("expected png output")
 		}

@@ -111,7 +111,10 @@ func setupSignals(env Env) <-chan os.Signal {
 func setupInputReader(in io.Reader) (chan inputEvent, chan struct{}) {
 	inputCh := make(chan inputEvent, 16)
 	stopCh := make(chan struct{})
-	go readInput(in, inputCh, stopCh)
+	go func() {
+		defer close(inputCh)
+		readInput(in, inputCh, stopCh)
+	}()
 	return inputCh, stopCh
 }
 
@@ -223,7 +226,11 @@ func handleEvents(state *appState, out *bufio.Writer, prefetchCh chan prefetchRe
 	case <-sigs:
 		close(stopCh)
 		return true
-	case ev := <-inputCh:
+	case ev, ok := <-inputCh:
+		if !ok {
+			close(stopCh)
+			return true
+		}
 		if handleInput(state, ev, out, prefetchCh) {
 			close(stopCh)
 			return true
