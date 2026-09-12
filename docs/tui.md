@@ -31,6 +31,8 @@ gifgrep tui --source giphy cats
 | `q`      | Quit while browsing; type `q` while editing a query.  |
 | `Ctrl-C` | Quit from either mode.                              |
 
+Search editing accepts Unicode text, including accented letters, CJK characters, and emoji. Backspace removes one Unicode code point at a time without corrupting the query.
+
 On Linux, clipboard copy prefers `wl-copy` in Wayland sessions (`WAYLAND_DISPLAY` or `XDG_SESSION_TYPE=wayland`) and `xclip` otherwise. Install `wl-clipboard` for Wayland or `xclip` for X11; if the preferred tool is missing, gifgrep uses the other installed tool. macOS uses its built-in clipboard integration.
 
 Add `--cache` (or set `GIFGREP_CACHE=1`) to reuse explicit downloads across sessions, including GIFs saved by the CLI. The `d`/`f` actions still save to `~/Downloads`. Cache location, age, and size flags match the [download cache options](search.md#download-cache); previews and prefetches remain temporary.
