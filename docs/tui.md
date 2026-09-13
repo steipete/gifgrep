@@ -27,7 +27,7 @@ gifgrep tui --source giphy cats
 | `↑` `↓`  | Move selection.                                     |
 | `d`      | Download current selection to `~/Downloads`.        |
 | `c`      | Copy the selected GIF to the clipboard.              |
-| `f`      | Reveal last download in Finder / Explorer / Files.  |
+| `f`      | Download if needed, then reveal the selected GIF.   |
 | `q`      | Quit while browsing; type `q` while editing a query.  |
 | `Ctrl-C` | Quit from either mode.                              |
 
@@ -48,7 +48,7 @@ The TUI streams animated previews using the [Kitty graphics protocol](previews.m
 | iTerm2         | Native — iTerm2 plays GIFs from raw bytes.                            |
 | Sixel          | Software playback (gifgrep redraws frames into the same cell area).   |
 | ANSI fallback  | Software playback with truecolor half-blocks.                         |
-| Apple Terminal | Falls back to a static list (no graphics protocol).                   |
+| Apple Terminal | No graphics detected; use `GIFGREP_INLINE=ansi` to force truecolor.   |
 | tmux           | Best with a graphics-aware host terminal; YMMV with image passthrough.|
 
 Force or disable software playback:
@@ -80,6 +80,6 @@ See [Providers](providers/) for the full matrix.
 
 ## When the TUI is the wrong tool
 
-- For pipelines and scripts, use [`gifgrep search`](search.md). The TUI never writes to stdout.
+- For pipelines and scripts, use [`gifgrep search`](search.md). The TUI writes terminal control sequences to stdout.
 - For local frame extraction, use [`still`](still.md) or [`sheet`](sheet.md). The TUI is search-first.
 - In a non-interactive shell (CI, cron), the TUI will refuse to start. Use `search` with `--json`.

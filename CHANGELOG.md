@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.4.2 - Unreleased
+## Unreleased
+
+- Docs: correct search formats, thumbnail flags, optional JSON fields, and terminal preview behavior; keep the generated site in sync.
 
 ## 0.4.1 - 2026-09-11
 

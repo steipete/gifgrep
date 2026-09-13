@@ -44,11 +44,11 @@ gifgrep cats --json --max 2
 | `title`       | string    | Human title; falls back to provider description, then `id`.        |
 | `url`         | string    | Direct GIF URL — what `--format url` prints.                       |
 | `preview_url` | string    | Smaller GIF good for thumbnails / inline previews.                 |
-| `tags`        | string[]  | May be empty depending on provider.                                |
-| `width`       | number    | Original GIF width in pixels (0 if unknown).                       |
-| `height`      | number    | Original GIF height in pixels (0 if unknown).                      |
+| `tags`        | string[]  | Omitted when empty; supplied by KLIPY when available.               |
+| `width`       | number    | Original GIF width in pixels; omitted when zero/unknown.          |
+| `height`      | number    | Original GIF height in pixels; omitted when zero/unknown.         |
 
-The shape is identical across providers. Field values may differ — KLIPY tends to ship tags more aggressively than GIPHY, and dimensions can be `0` when the upstream omits them.
+Both providers use this shape. GIPHY results omit tags; either provider can omit unknown dimensions.
 
 ## Stability
 

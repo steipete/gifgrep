@@ -5,15 +5,16 @@ description: "How gifgrep renders animated GIFs inline in Kitty, Ghostty, and iT
 
 # Inline previews
 
-`gifgrep` ships GIF bytes into your terminal so you can see results without leaving the shell. There are two protocols at play.
+`gifgrep` renders GIFs using the graphics protocol supported by your terminal.
 
 | Terminal       | Protocol                                | TUI animation         | CLI `--thumbs`         |
 |----------------|------------------------------------------|-----------------------|------------------------|
 | Kitty          | Kitty graphics                           | Native, hardware       | Still frame            |
 | Ghostty        | Kitty graphics                           | Software (frame ticks) | Still frame            |
 | iTerm2         | OSC 1337 (Inline Images)                 | Native (raw GIF)       | Animated thumb         |
-| WezTerm        | Kitty graphics (subset)                  | Best-effort            | Still frame            |
-| Apple Terminal | Neither                                  | Falls back to text     | No thumbs              |
+| WezTerm / Windows Terminal | Sixel                        | Software (frame ticks) | Still frame            |
+| Truecolor (forced) | ANSI half-blocks                      | Software (frame ticks) | No thumbs              |
+| Apple Terminal | None detected                            | Refuses to start unless forced | No thumbs       |
 
 The CLI never outputs image bytes when stdout is a pipe — only on a TTY.
 

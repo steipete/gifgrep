@@ -52,7 +52,7 @@ Keys:
 - `/` — edit search
 - `↑` / `↓` — select
 - `d` — download to `~/Downloads`
-- `f` — reveal last download in your file manager
+- `f` — download if needed and reveal the selected GIF in your file manager
 - `q` — quit
 
 In Kitty, Ghostty, or iTerm2 you'll get **animated inline previews**. See [Previews](previews.md) for protocol details.
