@@ -24,6 +24,8 @@ npm install
 make docs-site
 ```
 
+The builder generates HTML and `llms.txt` together and validates local links. Commit the regenerated files with Markdown changes. The Markdown renderer, syntax highlighter, and shared HTML escaping live in separate `scripts/docs-*.mjs` modules.
+
 ## Ghostty web snapshot
 
 Install Playwright's Chromium build once, then run the snapshot target:

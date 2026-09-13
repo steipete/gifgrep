@@ -45,7 +45,7 @@ Responses are normalised into the [`Result`](../json.md#fields) shape:
 - `url` ← `images.original.url`
 - `preview_url` ← `images.fixed_width_small.url`
 - `width` / `height` ← `images.original.width`/`.height`
-- `tags` ← derived from title tokens (GIPHY doesn't expose a native tag list on search)
+- `tags` is omitted (GIPHY doesn't expose a native tag list on search).
 
 ## Limits and ratings
 

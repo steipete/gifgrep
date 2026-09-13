@@ -267,8 +267,8 @@ body:not(.home) .doc>h1:first-child{display:none}
       </header>
       <div class="doc-grid">
         <article class="doc"><h1 id="inline-previews">Inline previews</h1>
-<p><code>gifgrep</code> ships GIF bytes into your terminal so you can see results without leaving the shell. There are two protocols at play.</p>
-<table><thead><tr><th>Terminal</th><th>Protocol</th><th>TUI animation</th><th>CLI <code>--thumbs</code></th></tr></thead><tbody><tr><td>Kitty</td><td>Kitty graphics</td><td>Native, hardware</td><td>Still frame</td></tr><tr><td>Ghostty</td><td>Kitty graphics</td><td>Software (frame ticks)</td><td>Still frame</td></tr><tr><td>iTerm2</td><td>OSC 1337 (Inline Images)</td><td>Native (raw GIF)</td><td>Animated thumb</td></tr><tr><td>WezTerm</td><td>Kitty graphics (subset)</td><td>Best-effort</td><td>Still frame</td></tr><tr><td>Apple Terminal</td><td>Neither</td><td>Falls back to text</td><td>No thumbs</td></tr></tbody></table>
+<p><code>gifgrep</code> renders GIFs using the graphics protocol supported by your terminal.</p>
+<table><thead><tr><th>Terminal</th><th>Protocol</th><th>TUI animation</th><th>CLI <code>--thumbs</code></th></tr></thead><tbody><tr><td>Kitty</td><td>Kitty graphics</td><td>Native, hardware</td><td>Still frame</td></tr><tr><td>Ghostty</td><td>Kitty graphics</td><td>Software (frame ticks)</td><td>Still frame</td></tr><tr><td>iTerm2</td><td>OSC 1337 (Inline Images)</td><td>Native (raw GIF)</td><td>Animated thumb</td></tr><tr><td>WezTerm / Windows Terminal</td><td>Sixel</td><td>Software (frame ticks)</td><td>Still frame</td></tr><tr><td>Truecolor (forced)</td><td>ANSI half-blocks</td><td>Software (frame ticks)</td><td>No thumbs</td></tr><tr><td>Apple Terminal</td><td>None detected</td><td>Refuses to start unless forced</td><td>No thumbs</td></tr></tbody></table>
 <p>The CLI never outputs image bytes when stdout is a pipe — only on a TTY.</p>
 <h2 id="kitty-graphics"><a class="anchor" href="#kitty-graphics" aria-label="Anchor link">#</a>Kitty graphics</h2>
 <p>Used by Kitty and Ghostty. The escape envelope:</p>

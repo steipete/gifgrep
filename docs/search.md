@@ -18,8 +18,8 @@ gifgrep search <query> ... [flags]
 gifgrep cats                              # plain on TTY, URL-per-line in pipes
 gifgrep cats --max 5                      # cap results
 gifgrep cats --json | jq '.[0].url'       # structured
-gifgrep cats --format md                  # markdown image links
-gifgrep cats --thumbs                     # inline still thumbs (Kitty/iTerm2 TTY)
+gifgrep cats --format md                  # markdown links
+gifgrep cats --thumbs always              # inline thumbnails (supported TTYs)
 gifgrep cats --download --max 1           # save to ~/Downloads
 gifgrep --source giphy "office handshake" # force GIPHY
 ```
@@ -30,14 +30,14 @@ gifgrep --source giphy "office handshake" # force GIPHY
 |--------------------|---------------------------------------------------------------|
 | `--format auto`    | Plain readable list on TTY, URL-per-line on pipes (default).  |
 | `--format url`     | One URL per line. Best for `xargs`, `wget`, or `pbcopy`.      |
-| `--format plain`   | `title — url` per line, no decoration.                        |
-| `--format tsv`     | `id<TAB>title<TAB>url<TAB>preview_url<TAB>w<TAB>h`.           |
-| `--format md`      | `![title](url)` markdown image lines.                         |
-| `--format comment` | URLs prefixed with `# title` for clipboard-friendly snippets. |
+| `--format plain`   | Title, then an indented URL, with a blank line between results. |
+| `--format tsv`     | `title<TAB>url`, with an optional leading index.               |
+| `--format md`      | `- [title](url)`, or a numbered list with `--number`.           |
+| `--format comment` | `url  # title`, with an optional leading index.               |
 | `--format json`    | Same envelope as `--json`.                                    |
 | `--json`           | Pretty-printed JSON array — see [JSON output](json.md).       |
 
-`-n` / `--number` prefixes each line with its 1-based index.
+`-n` / `--number` adds a 1-based result index to text formats. It does not change JSON.
 
 ## Common flags
 
@@ -47,7 +47,7 @@ gifgrep --source giphy "office handshake" # force GIPHY
 --json                              pretty JSON array
 --format <auto|...>                 see above
 --number, -n                        prefix lines with 1-based index
---thumbs[=auto|on|off]              inline still thumbs (Kitty/iTerm2, TTY only)
+--thumbs <auto|always|never>        inline thumbnails (TTY only)
 --download                          save results to ~/Downloads
 --reveal                            after --download, open the folder
 --color <auto|always|never>         color output
@@ -58,10 +58,10 @@ gifgrep --source giphy "office handshake" # force GIPHY
 
 ## Inline thumbnails (CLI)
 
-`--thumbs` shows a single still frame next to each result, decoded locally and uploaded via the [Kitty graphics protocol](previews.md#kitty-graphics) (Kitty/Ghostty) or [OSC 1337](previews.md#iterm2-osc-1337) (iTerm2). Notes:
+`--thumbs always` shows an image next to each result using [Kitty graphics](previews.md#kitty-graphics), [OSC 1337](previews.md#iterm2-osc-1337), or [Sixel](sixel.md). Notes:
 
 - TTY only — pipes never receive image bytes.
-- One **still** frame per row. For animated previews, use the [TUI](tui.md).
+- Kitty and Sixel show the first decoded frame. iTerm2 receives the original image bytes and can animate GIF thumbnails.
 - `auto` enables thumbs only when the terminal is detected as supporting inline images.
 
 ## Downloading
@@ -127,7 +127,7 @@ Full provider matrix: [Providers](providers/).
 
 ## Exit behavior
 
-- `0` — at least one result was printed.
+- `0` — search completed successfully, including an empty result set (`[]` in JSON).
 - non-zero — provider error, missing API key, or transport failure (logged to stderr).
 
 Human progress and errors always go to stderr, so `--json` and `--format url` pipes stay parseable.

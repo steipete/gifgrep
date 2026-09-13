@@ -274,20 +274,20 @@ gifgrep search &lt;query&gt; ... [flags]</code></pre>
 <pre><code class="language-bash"><span class="hl-cmd">gifgrep</span> cats                             <span class="hl-c"> # plain on TTY, URL-per-line in pipes</span>
 <span class="hl-cmd">gifgrep</span> cats <span class="hl-f">--max</span> <span class="hl-n">5</span>                     <span class="hl-c"> # cap results</span>
 <span class="hl-cmd">gifgrep</span> cats <span class="hl-f">--json</span> | <span class="hl-cmd">jq</span> <span class="hl-s">&#39;.[0].url&#39;</span>      <span class="hl-c"> # structured</span>
-<span class="hl-cmd">gifgrep</span> cats <span class="hl-f">--format</span> md                 <span class="hl-c"> # markdown image links</span>
-<span class="hl-cmd">gifgrep</span> cats <span class="hl-f">--thumbs</span>                    <span class="hl-c"> # inline still thumbs (Kitty/iTerm2 TTY)</span>
+<span class="hl-cmd">gifgrep</span> cats <span class="hl-f">--format</span> md                 <span class="hl-c"> # markdown links</span>
+<span class="hl-cmd">gifgrep</span> cats <span class="hl-f">--thumbs</span> always             <span class="hl-c"> # inline thumbnails (supported TTYs)</span>
 <span class="hl-cmd">gifgrep</span> cats <span class="hl-f">--download</span> <span class="hl-f">--max</span> <span class="hl-n">1</span>          <span class="hl-c"> # save to ~/Downloads</span>
 <span class="hl-cmd">gifgrep</span> <span class="hl-f">--source</span> giphy <span class="hl-s">&quot;office handshake&quot;</span><span class="hl-c"> # force GIPHY</span></code></pre>
 <h2 id="output-formats"><a class="anchor" href="#output-formats" aria-label="Anchor link">#</a>Output formats</h2>
-<table><thead><tr><th>Mode</th><th>What you get</th></tr></thead><tbody><tr><td><code>--format auto</code></td><td>Plain readable list on TTY, URL-per-line on pipes (default).</td></tr><tr><td><code>--format url</code></td><td>One URL per line. Best for <code>xargs</code>, <code>wget</code>, or <code>pbcopy</code>.</td></tr><tr><td><code>--format plain</code></td><td><code>title — url</code> per line, no decoration.</td></tr><tr><td><code>--format tsv</code></td><td><code>id&lt;TAB&gt;title&lt;TAB&gt;url&lt;TAB&gt;preview_url&lt;TAB&gt;w&lt;TAB&gt;h</code>.</td></tr><tr><td><code>--format md</code></td><td><code>![title](url)</code> markdown image lines.</td></tr><tr><td><code>--format comment</code></td><td>URLs prefixed with <code># title</code> for clipboard-friendly snippets.</td></tr><tr><td><code>--format json</code></td><td>Same envelope as <code>--json</code>.</td></tr><tr><td><code>--json</code></td><td>Pretty-printed JSON array — see <a href="json.html">JSON output</a>.</td></tr></tbody></table>
-<p><code>-n</code> / <code>--number</code> prefixes each line with its 1-based index.</p>
+<table><thead><tr><th>Mode</th><th>What you get</th></tr></thead><tbody><tr><td><code>--format auto</code></td><td>Plain readable list on TTY, URL-per-line on pipes (default).</td></tr><tr><td><code>--format url</code></td><td>One URL per line. Best for <code>xargs</code>, <code>wget</code>, or <code>pbcopy</code>.</td></tr><tr><td><code>--format plain</code></td><td>Title, then an indented URL, with a blank line between results.</td></tr><tr><td><code>--format tsv</code></td><td><code>title&lt;TAB&gt;url</code>, with an optional leading index.</td></tr><tr><td><code>--format md</code></td><td><code>- [title](url)</code>, or a numbered list with <code>--number</code>.</td></tr><tr><td><code>--format comment</code></td><td><code>url  # title</code>, with an optional leading index.</td></tr><tr><td><code>--format json</code></td><td>Same envelope as <code>--json</code>.</td></tr><tr><td><code>--json</code></td><td>Pretty-printed JSON array — see <a href="json.html">JSON output</a>.</td></tr></tbody></table>
+<p><code>-n</code> / <code>--number</code> adds a 1-based result index to text formats. It does not change JSON.</p>
 <h2 id="common-flags"><a class="anchor" href="#common-flags" aria-label="Anchor link">#</a>Common flags</h2>
 <pre><code class="language-text">--source &lt;auto|giphy|klipy|tenor&gt;   choose a provider (default: auto)
 --max, -m &lt;N&gt;                       max results (default 20)
 --json                              pretty JSON array
 --format &lt;auto|...&gt;                 see above
 --number, -n                        prefix lines with 1-based index
---thumbs[=auto|on|off]              inline still thumbs (Kitty/iTerm2, TTY only)
+--thumbs &lt;auto|always|never&gt;        inline thumbnails (TTY only)
 --download                          save results to ~/Downloads
 --reveal                            after --download, open the folder
 --color &lt;auto|always|never&gt;         color output
@@ -295,10 +295,10 @@ gifgrep search &lt;query&gt; ... [flags]</code></pre>
 -v / -vv                            stderr debug logs
 -q                                  quiet</code></pre>
 <h2 id="inline-thumbnails-cli"><a class="anchor" href="#inline-thumbnails-cli" aria-label="Anchor link">#</a>Inline thumbnails (CLI)</h2>
-<p><code>--thumbs</code> shows a single still frame next to each result, decoded locally and uploaded via the <a href="previews.html#kitty-graphics">Kitty graphics protocol</a> (Kitty/Ghostty) or <a href="previews.html#iterm2-osc-1337">OSC 1337</a> (iTerm2). Notes:</p>
+<p><code>--thumbs always</code> shows an image next to each result using <a href="previews.html#kitty-graphics">Kitty graphics</a>, <a href="previews.html#iterm2-osc-1337">OSC 1337</a>, or <a href="sixel.html">Sixel</a>. Notes:</p>
 <ul>
 <li>TTY only — pipes never receive image bytes.</li>
-<li>One <strong>still</strong> frame per row. For animated previews, use the <a href="tui.html">TUI</a>.</li>
+<li>Kitty and Sixel show the first decoded frame. iTerm2 receives the original image bytes and can animate GIF thumbnails.</li>
 <li><code>auto</code> enables thumbs only when the terminal is detected as supporting inline images.</li>
 </ul>
 <h2 id="downloading"><a class="anchor" href="#downloading" aria-label="Anchor link">#</a>Downloading</h2>
@@ -335,7 +335,7 @@ GIFGREP_CACHE=<span class="hl-n">1</span> GIFGREP_CACHE_DIR=/path/to/cache <span
 <p>Full provider matrix: <a href="providers/">Providers</a>.</p>
 <h2 id="exit-behavior"><a class="anchor" href="#exit-behavior" aria-label="Anchor link">#</a>Exit behavior</h2>
 <ul>
-<li><code>0</code> — at least one result was printed.</li>
+<li><code>0</code> — search completed successfully, including an empty result set (<code>[]</code> in JSON).</li>
 <li>non-zero — provider error, missing API key, or transport failure (logged to stderr).</li>
 </ul>
 <p>Human progress and errors always go to stderr, so <code>--json</code> and <code>--format url</code> pipes stay parseable.</p><nav class="page-nav" aria-label="Pager"><a class="page-nav-prev" href="commands.html"><small>Previous</small><span>Commands</span></a><a class="page-nav-next" href="tui.html"><small>Next</small><span>TUI</span></a></nav></article>
