@@ -178,9 +178,7 @@ func encodePNG(img image.Image) ([]byte, error) {
 	if err := pngEncoder.Encode(buf, img); err != nil {
 		return nil, err
 	}
-	out := make([]byte, buf.Len())
-	copy(out, buf.Bytes())
-	return out, nil
+	return bytes.Clone(buf.Bytes()), nil
 }
 
 func readAllLimit(r io.Reader, maxBytes int64) ([]byte, error) {

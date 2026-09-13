@@ -8,7 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 	"time"
 
@@ -109,7 +109,7 @@ func pruneDownloadCache(dir string, opts model.CacheOptions) {
 	if opts.MaxBytes == 0 {
 		return
 	}
-	sort.Slice(files, func(i, j int) bool { return files[i].ModTime().Before(files[j].ModTime()) })
+	slices.SortFunc(files, func(a, b os.FileInfo) int { return a.ModTime().Compare(b.ModTime()) })
 	for _, info := range files {
 		if total <= opts.MaxBytes {
 			break

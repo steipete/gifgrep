@@ -5,8 +5,7 @@ import "testing"
 func BenchmarkDecodeSmall(b *testing.B) {
 	data := makeTestGIF(4)
 	opts := DefaultOptions()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		if _, err := Decode(data, opts); err != nil {
 			b.Fatalf("decode failed: %v", err)
 		}
@@ -16,8 +15,7 @@ func BenchmarkDecodeSmall(b *testing.B) {
 func BenchmarkDecodeMedium(b *testing.B) {
 	data := makeMediumGIF()
 	opts := DefaultOptions()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		if _, err := Decode(data, opts); err != nil {
 			b.Fatalf("decode failed: %v", err)
 		}
@@ -39,8 +37,7 @@ func BenchmarkDecodeFixtures(b *testing.B) {
 	for _, fixture := range fixtures {
 		data := readFixture(b, fixture.file)
 		b.Run(fixture.name, func(b *testing.B) {
-			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				if _, err := Decode(data, opts); err != nil {
 					b.Fatalf("decode failed: %v", err)
 				}
