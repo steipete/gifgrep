@@ -19,6 +19,8 @@ var (
 	ErrInvalidSheet = errors.New("invalid sheet size")
 )
 
+const maxSheetPixels = 40_000_000
+
 type SheetOptions struct {
 	Count      int
 	Columns    int
@@ -93,10 +95,15 @@ func ContactSheet(decoded *gifdecode.Frames, opts SheetOptions) ([]byte, error) 
 		return nil, ErrInvalidSheet
 	}
 
-	rows := int(math.Ceil(float64(opts.Count) / float64(opts.Columns)))
-
-	sheetWidth := frameWidth*opts.Columns + opts.Padding*(opts.Columns-1)
-	sheetHeight := frameHeight*rows + opts.Padding*(rows-1)
+	rows := 1 + (opts.Count-1)/opts.Columns
+	sheetWidth, ok := sheetDimension(frameWidth, opts.Columns, opts.Padding)
+	if !ok {
+		return nil, ErrInvalidSheet
+	}
+	sheetHeight, ok := sheetDimension(frameHeight, rows, opts.Padding)
+	if !ok || sheetWidth > maxSheetPixels/sheetHeight {
+		return nil, ErrInvalidSheet
+	}
 
 	sheet := image.NewRGBA(image.Rect(0, 0, sheetWidth, sheetHeight))
 	draw.Draw(sheet, sheet.Bounds(), &image.Uniform{C: opts.Background}, image.Point{}, draw.Src)
@@ -125,6 +132,20 @@ func ContactSheet(decoded *gifdecode.Frames, opts SheetOptions) ([]byte, error) 
 	return buf.Bytes(), nil
 }
 
+func sheetDimension(frame, cells, padding int) (int, bool) {
+	if frame > maxSheetPixels/cells {
+		return 0, false
+	}
+	size := frame * cells
+	if cells > 1 {
+		if padding > (maxSheetPixels-size)/(cells-1) {
+			return 0, false
+		}
+		size += padding * (cells - 1)
+	}
+	return size, true
+}
+
 func totalDuration(frames []gifdecode.Frame) time.Duration {
 	var total time.Duration
 	for _, frame := range frames {
@@ -139,6 +160,13 @@ func sampleIndices(frames []gifdecode.Frame, count int) []int {
 	}
 	if len(frames) == 0 {
 		return []int{}
+	}
+	if count >= len(frames) {
+		indices := make([]int, len(frames))
+		for i := range indices {
+			indices[i] = i
+		}
+		return indices
 	}
 	if count == 1 {
 		return []int{0}

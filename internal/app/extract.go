@@ -40,7 +40,7 @@ func runExtract(opts model.Options) error {
 		return err
 	}
 	decodeOpts := gifdecode.DefaultOptions()
-	decodeOpts.MaxFrames = 0
+	decodeOpts.MaxFrames = -1
 	decoded, err := gifdecode.Decode(data, decodeOpts)
 	if err != nil {
 		return err

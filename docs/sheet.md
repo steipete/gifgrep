@@ -36,6 +36,8 @@ Frames are sampled at evenly-spaced timestamps across the GIF's full duration. I
 
 `--cols 0` (the default) picks a column count that yields a roughly square grid; otherwise the layout is `cols × ceil(frames / cols)`.
 
+Output is limited to 40 million pixels. Dimensions or padding that overflow or exceed that budget return an error before allocating the sheet.
+
 ## Writing to stdout
 
 ```bash
