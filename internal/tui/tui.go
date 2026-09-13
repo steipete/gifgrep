@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/steipete/gifgrep/internal/model"
@@ -72,11 +74,13 @@ func setupOutput(out *bufio.Writer, inline termcaps.InlineProtocol) func() {
 	}
 }
 
-func setupSignals(env Env) <-chan os.Signal {
+func setupSignals(env Env) (<-chan os.Signal, func()) {
 	if env.SignalCh != nil {
-		return env.SignalCh
+		return env.SignalCh, func() {}
 	}
-	return make(chan os.Signal)
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	return sigs, func() { signal.Stop(sigs) }
 }
 
 func setupInputReader(in io.Reader) (chan inputEvent, chan struct{}) {
@@ -121,7 +125,7 @@ func searchResults(state *appState, out *bufio.Writer, prefetchCh chan<- prefetc
 	render(state, out, state.lastRows, state.lastCols)
 	_ = out.Flush()
 
-	results, err := search.Search(state.query, state.opts)
+	results, source, err := search.Search(state.query, state.opts)
 	if err != nil {
 		state.status = "Search error: " + err.Error()
 		state.renderDirty = true
@@ -129,20 +133,21 @@ func searchResults(state *appState, out *bufio.Writer, prefetchCh chan<- prefetc
 	}
 
 	state.results = results
+	state.source = source
 	state.selected = 0
 	state.scroll = 0
+	resetPrefetch(state)
+	state.cache = map[string]*gifCacheEntry{}
 	if len(results) == 0 {
 		state.status = "No results"
 		state.currentAnim = nil
 		state.previewDirty = true
-		resetPrefetch(state)
 		state.renderDirty = true
 		return
 	}
 
 	state.status = fmt.Sprintf("%d results", len(results))
 	loadSelectedImage(state)
-	resetPrefetch(state)
 	startPrefetch(state, results, prefetchCh)
 	state.renderDirty = true
 }
@@ -169,7 +174,6 @@ func updateSizeIfNeeded(state *appState, env Env) {
 	if rows != state.lastRows || cols != state.lastCols {
 		state.lastRows = rows
 		state.lastCols = cols
-		ensureVisible(state)
 		state.renderDirty = true
 		state.previewDirty = true
 	}
@@ -255,7 +259,8 @@ func runWith(env Env, opts model.Options, query string) error {
 	out := bufio.NewWriter(env.Out)
 	defer setupOutput(out, inline)()
 
-	sigs := setupSignals(env)
+	sigs, stopSignals := setupSignals(env)
+	defer stopSignals()
 	inputCh, stopCh := setupInputReader(env.In)
 	prefetchCh := make(chan prefetchResult, 64)
 

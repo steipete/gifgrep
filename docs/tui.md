@@ -30,8 +30,11 @@ gifgrep tui --source giphy cats
 | `f`      | Download if needed, then reveal the selected GIF.   |
 | `q`      | Quit while browsing; type `q` while editing a query.  |
 | `Ctrl-C` | Quit from either mode.                              |
+| `Esc`    | Return to browsing when results are available.       |
 
 Search editing accepts Unicode text, including accented letters, CJK characters, and emoji. Backspace removes one Unicode code point at a time without corrupting the query.
+
+Selection stays within the visible result list as the terminal or preview size changes. Provider attribution follows the provider that supplied the results, including an `auto` fallback. Background downloads are cancelled and temporary preview files are removed when results are replaced or the TUI exits.
 
 On Linux, clipboard copy prefers `wl-copy` in Wayland sessions (`WAYLAND_DISPLAY` or `XDG_SESSION_TYPE=wayland`) and `xclip` otherwise. Install `wl-clipboard` for Wayland or `xclip` for X11; if the preferred tool is missing, gifgrep uses the other installed tool. macOS uses its built-in clipboard integration.
 

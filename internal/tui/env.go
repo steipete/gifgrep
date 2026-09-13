@@ -3,8 +3,6 @@ package tui
 import (
 	"io"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"golang.org/x/term"
 )
@@ -23,9 +21,6 @@ type Env struct {
 var defaultEnvFn = defaultEnv
 
 func defaultEnv() Env {
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-
 	return Env{
 		In:         os.Stdin,
 		Out:        os.Stdout,
@@ -34,7 +29,6 @@ func defaultEnv() Env {
 		MakeRaw:    term.MakeRaw,
 		Restore:    term.Restore,
 		GetSize:    term.GetSize,
-		SignalCh:   sigs,
 	}
 }
 

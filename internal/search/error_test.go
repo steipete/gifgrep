@@ -21,7 +21,7 @@ func TestTransportErrorDoesNotExposeSearchCredentials(t *testing.T) {
 	failure := errors.New("connection refused")
 	testutil.WithTransport(t, failingTransport{failure}, func() {
 		for _, source := range []string{"giphy", "klipy", "auto"} {
-			_, err := Search("private-query", model.Options{Source: source})
+			_, _, err := Search("private-query", model.Options{Source: source})
 			if !errors.Is(err, failure) {
 				t.Fatalf("%s: lost transport cause: %v", source, err)
 			}

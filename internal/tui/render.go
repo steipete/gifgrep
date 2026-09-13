@@ -22,6 +22,7 @@ func render(state *appState, out *bufio.Writer, rows, cols int) {
 	}
 
 	layout := buildLayout(state, rows, cols)
+	ensureVisible(state, layout.listHeight)
 
 	if state.inline == termcaps.InlineIterm && layout.showRight && shouldSendItermPreview(state, layout) {
 		if shouldHardClearIterm(state, layout) {
@@ -158,7 +159,10 @@ func drawStatus(out *bufio.Writer, state *appState, layout layout) {
 	if status == "" {
 		status = fmt.Sprintf("%d results", len(state.results))
 	}
-	source := search.ResolveSource(state.opts.Source)
+	source := state.source
+	if source == "" {
+		source = search.ResolveSource(state.opts.Source)
+	}
 	showGiphyAttribution := source == "giphy"
 	showKlipyAttribution := source == "klipy"
 	showGiphyIcon := showGiphyAttribution && state.inline == termcaps.InlineKitty
@@ -203,7 +207,7 @@ func formatStatusLine(useColor bool, status string) string {
 
 func drawSearch(out *bufio.Writer, state *appState, layout layout) {
 	label := "Search"
-	if search.ResolveSource(state.opts.Source) == "klipy" {
+	if state.source == "klipy" || (state.source == "" && search.ResolveSource(state.opts.Source) == "klipy") {
 		label = "Search KLIPY"
 	}
 	pill := "[" + label + "]"

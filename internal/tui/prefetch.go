@@ -1,8 +1,10 @@
 package tui
 
 import (
+	"context"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -63,6 +65,10 @@ func startPrefetch(state *appState, results []model.Result, notify chan<- prefet
 		return
 	}
 	gen := state.prefetchGen
+	if state.prefetchCancel == nil {
+		state.prefetchCtx, state.prefetchCancel = context.WithCancel(context.Background())
+	}
+	ctx := state.prefetchCtx
 	for _, item := range results {
 		if item.URL == "" {
 			continue
@@ -79,10 +85,16 @@ func startPrefetch(state *appState, results []model.Result, notify chan<- prefet
 		}
 		state.prefetching[key] = true
 		url := item.URL
-		go func() {
-			path, err := prefetchGIFToTemp(url, dir, maxBytes)
-			notify <- prefetchResult{key: key, gen: gen, path: path, err: err}
-		}()
+		state.prefetchWG.Go(func() {
+			path, err := prefetchGIFToTemp(ctx, url, dir, maxBytes)
+			select {
+			case notify <- prefetchResult{key: key, gen: gen, path: path, err: err}:
+			case <-ctx.Done():
+				if path != "" {
+					_ = os.Remove(path)
+				}
+			}
+		})
 	}
 }
 
@@ -91,21 +103,17 @@ func resetPrefetch(state *appState) {
 		return
 	}
 	state.prefetchGen++
-	for _, path := range state.tempPaths {
-		if path != "" {
-			_ = os.Remove(path)
-		}
-	}
+	cleanupTempDir(state)
 	state.prefetching = map[string]bool{}
 	state.tempPaths = map[string]string{}
 }
 
-func prefetchGIFToTemp(gifURL, dir string, maxBytes int64) (string, error) {
+func prefetchGIFToTemp(ctx context.Context, gifURL, dir string, maxBytes int64) (string, error) {
 	if dir == "" {
 		return "", fmt.Errorf("missing temp dir")
 	}
 	client := &http.Client{Timeout: 20 * time.Second}
-	req, err := http.NewRequest(http.MethodGet, gifURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, gifURL, nil)
 	if err != nil {
 		return "", err
 	}
@@ -138,7 +146,11 @@ func prefetchGIFToTemp(gifURL, dir string, maxBytes int64) (string, error) {
 	if limit <= 0 {
 		limit = 1<<63 - 1
 	}
-	n, err := io.Copy(tmp, io.LimitReader(resp.Body, limit+1))
+	var body io.Reader = resp.Body
+	if limit < math.MaxInt64 {
+		body = io.LimitReader(body, limit+1)
+	}
+	n, err := io.Copy(tmp, body)
 	if err != nil {
 		cleanup()
 		return "", err
@@ -155,10 +167,18 @@ func prefetchGIFToTemp(gifURL, dir string, maxBytes int64) (string, error) {
 }
 
 func cleanupTempDir(state *appState) {
-	if state == nil || state.tempDir == "" {
+	if state == nil {
 		return
 	}
-	_ = os.RemoveAll(state.tempDir)
+	if state.prefetchCancel != nil {
+		state.prefetchCancel()
+		state.prefetchWG.Wait()
+		state.prefetchCancel = nil
+		state.prefetchCtx = nil
+	}
+	if state.tempDir != "" {
+		_ = os.RemoveAll(state.tempDir)
+	}
 	state.tempDir = ""
 	state.tempPaths = nil
 	state.prefetching = nil
@@ -184,14 +204,14 @@ func acceptPrefetchResult(state *appState, res prefetchResult) bool {
 	if state == nil {
 		return false
 	}
-	delete(state.prefetching, res.key)
-	if res.err != nil {
-		return false
-	}
 	if res.gen != state.prefetchGen {
 		if res.path != "" {
 			_ = os.Remove(res.path)
 		}
+		return false
+	}
+	delete(state.prefetching, res.key)
+	if res.err != nil {
 		return false
 	}
 	if state.tempPaths == nil {

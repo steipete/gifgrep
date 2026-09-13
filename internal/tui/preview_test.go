@@ -96,7 +96,7 @@ func TestLoadSelectedImageUsesDownloadedFile(t *testing.T) {
 		selected:   0,
 		inline:     termcaps.InlineKitty,
 		cache:      map[string]*gifCacheEntry{},
-		savedPaths: map[string]string{"id:id1": tmp.Name()},
+		savedPaths: map[string]string{"url:https://example.test/full.gif": tmp.Name()},
 	}
 	testutil.WithTransport(t, &errTransport{}, func() {
 		loadSelectedImage(state)
@@ -152,7 +152,7 @@ func TestLoadSelectedImageUsesTempFile(t *testing.T) {
 		selected:   0,
 		inline:     termcaps.InlineKitty,
 		cache:      map[string]*gifCacheEntry{},
-		tempPaths:  map[string]string{"id:id1": tmp.Name()},
+		tempPaths:  map[string]string{"url:https://example.test/full.gif": tmp.Name()},
 		savedPaths: map[string]string{},
 	}
 	testutil.WithTransport(t, &errTransport{}, func() {

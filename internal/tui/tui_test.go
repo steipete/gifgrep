@@ -33,12 +33,12 @@ func TestPreviewSize(t *testing.T) {
 
 func TestEnsureVisible(t *testing.T) {
 	state := &appState{lastRows: 10, selected: 8, scroll: 0}
-	ensureVisible(state)
+	ensureVisible(state, 6)
 	if state.scroll == 0 {
 		t.Fatalf("scroll should advance")
 	}
 	state.selected = 0
-	ensureVisible(state)
+	ensureVisible(state, 6)
 	if state.scroll != 0 {
 		t.Fatalf("scroll should reset")
 	}
@@ -286,16 +286,16 @@ func TestRenderAndLines(t *testing.T) {
 	}
 
 	buf.Reset()
-	writeLine(out, "hello world", 5)
+	writeLineAt(out, 2, 3, "hello world", 5)
 	_ = out.Flush()
-	if buf.String() != "hello\x1b[K\r\n" {
-		t.Fatalf("unexpected writeLine output: %q", buf.String())
+	if buf.String() != "\x1b[2;3Hhello\x1b[K" {
+		t.Fatalf("unexpected writeLineAt output: %q", buf.String())
 	}
 
 	buf.Reset()
-	writeLine(out, "x", 0)
+	writeLineAt(out, 1, 1, "x", 0)
 	_ = out.Flush()
-	if buf.String() != "\r\n" {
-		t.Fatalf("expected newline for width 0")
+	if buf.String() != "\x1b[1;1H\x1b[K" {
+		t.Fatalf("expected erase for width 0")
 	}
 }

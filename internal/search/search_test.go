@@ -14,7 +14,7 @@ func TestFetchKlipyAndGIF(t *testing.T) {
 	t.Setenv("KLIPY_API_KEY", "test-key")
 	gifData := testutil.MakeTestGIF()
 	testutil.WithTransport(t, &testutil.FakeTransport{GIFData: gifData}, func() {
-		if _, err := Search("cats", model.Options{Source: "nope"}); err == nil {
+		if _, _, err := Search("cats", model.Options{Source: "nope"}); err == nil {
 			t.Fatalf("expected unknown source error")
 		}
 		out, err := fetchKlipyV2("cats", model.Options{Limit: 1})
@@ -92,7 +92,7 @@ func TestFetchGiphy(t *testing.T) {
 			t.Fatalf("missing URLs")
 		}
 
-		_, err = Search("cats", model.Options{Limit: 1, Source: "giphy"})
+		_, _, err = Search("cats", model.Options{Limit: 1, Source: "giphy"})
 		if err != nil {
 			t.Fatalf("Search giphy failed: %v", err)
 		}
@@ -118,7 +118,10 @@ func TestAutoFallsBackToKlipyWhenGiphyFails(t *testing.T) {
 	t.Setenv("KLIPY_API_KEY", "test-key")
 	gifData := testutil.MakeTestGIF()
 	testutil.WithTransport(t, &giphyUnauthorizedTransport{fallback: testutil.FakeTransport{GIFData: gifData}}, func() {
-		out, err := Search("cats", model.Options{Limit: 1, Source: "auto"})
+		out, source, err := Search("cats", model.Options{Limit: 1, Source: "auto"})
+		if source != "klipy" {
+			t.Fatalf("fallback source = %q", source)
+		}
 		if err != nil {
 			t.Fatalf("Search auto failed: %v", err)
 		}
@@ -126,7 +129,7 @@ func TestAutoFallsBackToKlipyWhenGiphyFails(t *testing.T) {
 			t.Fatalf("expected Klipy fallback result, got %#v", out)
 		}
 
-		if _, err := Search("cats", model.Options{Limit: 1, Source: "giphy"}); err == nil {
+		if _, _, err := Search("cats", model.Options{Limit: 1, Source: "giphy"}); err == nil {
 			t.Fatalf("expected explicit giphy to return auth error")
 		}
 	})

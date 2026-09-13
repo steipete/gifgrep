@@ -14,17 +14,17 @@ var (
 	revealFn              = reveal.Reveal
 )
 
-func downloadSelected(state *appState, out *bufio.Writer, revealAfter bool) {
+func downloadSelected(state *appState, out *bufio.Writer, revealAfter bool) string {
 	if state.selected < 0 || state.selected >= len(state.results) {
 		flashHeader(state, "No selection")
 		state.renderDirty = true
-		return
+		return ""
 	}
 	item := state.results[state.selected]
 	if item.URL == "" {
 		flashHeader(state, "No URL")
 		state.renderDirty = true
-		return
+		return ""
 	}
 	flashHeader(state, "Downloading…")
 	state.renderDirty = true
@@ -35,23 +35,23 @@ func downloadSelected(state *appState, out *bufio.Writer, revealAfter bool) {
 	if err != nil {
 		flashHeader(state, "Download error: "+err.Error())
 		state.renderDirty = true
-		return
+		return ""
 	}
-	state.lastSavedPath = filePath
 	trackSavedPath(state, item, filePath)
 	loadSelectedImage(state)
 	if revealAfter {
 		if err := revealFn(filePath); err != nil {
 			flashHeader(state, "Saved (reveal failed)")
 			state.renderDirty = true
-			return
+			return filePath
 		}
 		flashHeader(state, "Saved (revealed)")
 		state.renderDirty = true
-		return
+		return filePath
 	}
 	flashHeader(state, "Saved")
 	state.renderDirty = true
+	return filePath
 }
 
 func handleRevealSelected(state *appState, out *bufio.Writer) bool {
@@ -69,8 +69,7 @@ func handleRevealSelected(state *appState, out *bufio.Writer) bool {
 
 	filePath, ok := savedPathForResult(state, item)
 	if !ok {
-		downloadSelected(state, out, false)
-		filePath = state.lastSavedPath
+		filePath = downloadSelected(state, out, false)
 	}
 	if filePath == "" {
 		// downloadSelected already set a useful status
@@ -110,11 +109,11 @@ func trackSavedPath(state *appState, item model.Result, path string) {
 }
 
 func resultKey(item model.Result) string {
-	if item.ID != "" {
-		return "id:" + item.ID
-	}
 	if item.URL != "" {
 		return "url:" + item.URL
+	}
+	if item.ID != "" {
+		return "id:" + item.ID
 	}
 	if item.Title != "" {
 		return "title:" + item.Title

@@ -41,7 +41,7 @@ func TestRevealSelectedUsesExistingDownload(t *testing.T) {
 		selected:   0,
 		lastRows:   24,
 		lastCols:   80,
-		savedPaths: map[string]string{"id:1": tmp.Name()},
+		savedPaths: map[string]string{"url:https://example.test/1.gif": tmp.Name()},
 	}
 
 	out := bufio.NewWriter(bytes.NewBuffer(nil))
@@ -104,7 +104,7 @@ func TestRevealSelectedDownloadsWhenMissing(t *testing.T) {
 	if revealed != downloadedPath {
 		t.Fatalf("expected reveal %q, got %q", downloadedPath, revealed)
 	}
-	if got := state.savedPaths["id:1"]; got != downloadedPath {
+	if got := state.savedPaths["url:https://example.test/1.gif"]; got != downloadedPath {
 		t.Fatalf("expected state.savedPaths to contain %q, got %q", downloadedPath, got)
 	}
 }
