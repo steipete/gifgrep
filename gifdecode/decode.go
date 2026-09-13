@@ -10,6 +10,7 @@ import (
 	_ "image/jpeg" // allow image.Decode fallback for stills
 	"image/png"
 	"io"
+	"math"
 	"sync"
 	"time"
 )
@@ -44,6 +45,12 @@ func DecodeReader(r io.Reader, opts Options) (*Frames, error) {
 }
 
 func decodeBytes(data []byte, opts Options) (*Frames, error) {
+	// Check the header before the image decoder can allocate pixel buffers.
+	if cfg, format, err := image.DecodeConfig(bytes.NewReader(data)); err == nil && (!opts.StrictGIF || format == "gif") {
+		if exceedsPixels(cfg.Width, cfg.Height, opts.MaxPixels) {
+			return nil, ErrTooLarge
+		}
+	}
 	g, err := gif.DecodeAll(bytes.NewReader(data))
 	if err != nil {
 		if opts.StrictGIF {
@@ -182,7 +189,7 @@ func encodePNG(img image.Image) ([]byte, error) {
 }
 
 func readAllLimit(r io.Reader, maxBytes int64) ([]byte, error) {
-	if maxBytes <= 0 {
+	if maxBytes <= 0 || maxBytes == math.MaxInt64 {
 		return io.ReadAll(r)
 	}
 	lr := &io.LimitedReader{R: r, N: maxBytes + 1}
@@ -200,6 +207,5 @@ func exceedsPixels(width, height, maxPixels int) bool {
 	if maxPixels <= 0 {
 		return false
 	}
-	pixels := int64(width) * int64(height)
-	return pixels > int64(maxPixels)
+	return width > 0 && height > 0 && width > maxPixels/height
 }

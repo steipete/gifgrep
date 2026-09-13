@@ -15,6 +15,7 @@ const (
 )
 
 type Options struct {
+	// MaxFrames limits returned frames; zero uses the default, negative disables the limit.
 	MaxFrames    int
 	MaxPixels    int
 	MaxBytes     int64

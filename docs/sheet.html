@@ -283,6 +283,7 @@ body:not(.home) .doc>h1:first-child{display:none}
 <h2 id="how-sampling-works"><a class="anchor" href="#how-sampling-works" aria-label="Anchor link">#</a>How sampling works</h2>
 <p>Frames are sampled at evenly-spaced timestamps across the GIF&#39;s full duration. If you ask for more frames than the GIF actually has, you get every frame (no duplication, no resampling).</p>
 <p><code>--cols 0</code> (the default) picks a column count that yields a roughly square grid; otherwise the layout is <code>cols × ceil(frames / cols)</code>.</p>
+<p>Output is limited to 40 million pixels. Dimensions or padding that overflow or exceed that budget return an error before allocating the sheet.</p>
 <h2 id="writing-to-stdout"><a class="anchor" href="#writing-to-stdout" aria-label="Anchor link">#</a>Writing to stdout</h2>
 <pre><code class="language-bash"><span class="hl-cmd">gifgrep</span> sheet <span class="hl-cmd">cat</span>.gif <span class="hl-f">--frames</span> <span class="hl-n">9</span> <span class="hl-f">--cols</span> <span class="hl-n">3</span> <span class="hl-f">-o</span> - &gt; sheet.png
 <span class="hl-cmd">gifgrep</span> sheet <span class="hl-cmd">cat</span>.gif <span class="hl-f">-o</span> - | pngquant - &gt; sheet-small.png</code></pre>

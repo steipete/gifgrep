@@ -38,6 +38,8 @@ gifgrep still cat.gif --at 0 -o cover.png --reveal
 
 `--at` accepts seconds (`1.5`, `1.5s`) or milliseconds (`250ms`). If you ask for a timestamp past the GIF's total duration, the last available frame is used.
 
+Extraction uses the complete animation, including frames beyond the TUI's preview limit. Negative, non-finite, and overflowing timestamps are rejected.
+
 ## How frame timing works
 
 GIFs encode per-frame delays (in centiseconds). gifgrep accumulates these deltas to map your `--at` value onto the closest preceding frame. There's no resampling — you always get a frame that actually exists in the source.

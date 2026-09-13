@@ -287,6 +287,7 @@ body:not(.home) .doc>h1:first-child{display:none}
 --reveal                   open the resulting file in your file manager
 -q / -v / --no-color       standard logging flags</code></pre>
 <p><code>--at</code> accepts seconds (<code>1.5</code>, <code>1.5s</code>) or milliseconds (<code>250ms</code>). If you ask for a timestamp past the GIF&#39;s total duration, the last available frame is used.</p>
+<p>Extraction uses the complete animation, including frames beyond the TUI&#39;s preview limit. Negative, non-finite, and overflowing timestamps are rejected.</p>
 <h2 id="how-frame-timing-works"><a class="anchor" href="#how-frame-timing-works" aria-label="Anchor link">#</a>How frame timing works</h2>
 <p>GIFs encode per-frame delays (in centiseconds). gifgrep accumulates these deltas to map your <code>--at</code> value onto the closest preceding frame. There&#39;s no resampling — you always get a frame that actually exists in the source.</p>
 <p>For a denser look at the GIF, see <a href="sheet.html"><code>sheet</code></a>.</p>
