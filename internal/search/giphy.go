@@ -1,14 +1,10 @@
 package search
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
-	"net/http"
 	"net/url"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/steipete/gifgrep/internal/model"
 )
@@ -24,14 +20,10 @@ type giphySearchResponse struct {
 				Height string `json:"height"`
 			} `json:"original"`
 			FixedWidthSmall struct {
-				URL    string `json:"url"`
-				Width  string `json:"width"`
-				Height string `json:"height"`
+				URL string `json:"url"`
 			} `json:"fixed_width_small"`
 			PreviewGIF struct {
-				URL    string `json:"url"`
-				Width  string `json:"width"`
-				Height string `json:"height"`
+				URL string `json:"url"`
 			} `json:"preview_gif"`
 		} `json:"images"`
 	} `json:"data"`
@@ -51,28 +43,11 @@ func fetchGiphyV1(query string, opts model.Options) ([]model.Result, error) {
 	params := url.Values{}
 	params.Set("q", query)
 	params.Set("api_key", apiKey)
-	params.Set("limit", fmt.Sprintf("%d", limit))
+	params.Set("limit", strconv.Itoa(limit))
 	params.Set("rating", "g")
 
-	reqURL := "https://api.giphy.com/v1/gifs/search?" + params.Encode()
-	client := &http.Client{Timeout: 10 * time.Second}
-	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("User-Agent", "gifgrep")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
-	}
-
 	var parsed giphySearchResponse
-	if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
+	if err := fetchSearchJSON("https://api.giphy.com/v1/gifs/search", params, &parsed); err != nil {
 		return nil, err
 	}
 

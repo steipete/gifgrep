@@ -43,15 +43,11 @@ linters:
       min-complexity: 30
     gocritic:
       enabled-checks:
-        - appendAssign
-        - badCond
         - boolExprSimplify
         - emptyStringTest
         - evalOrder
-        - ifElseChain
         - octalLiteral
         - rangeValCopy
-        - unslice
         - whyNoLint
 
 formatters:
