@@ -268,13 +268,14 @@ body:not(.home) .doc>h1:first-child{display:none}
       <div class="doc-grid">
         <article class="doc"><h1 id="development">Development</h1>
 <h2 id="go-workflow"><a class="anchor" href="#go-workflow" aria-label="Anchor link">#</a>Go workflow</h2>
+<p>Source builds require Go 1.26 or newer; <code>go.mod</code> pins the default development toolchain. CI tests the minimum supported Go line on Linux and the pinned toolchain on Linux/macOS, with race detection on Linux.</p>
 <p>Run the test suite and static checks before submitting a change:</p>
 <pre><code class="language-bash"><span class="hl-cmd">make</span> test
 <span class="hl-cmd">make</span> check
 <span class="hl-cmd">make</span> <span class="hl-cmd">gifgrep</span> -- <span class="hl-f">--help</span></code></pre>
 <h2 id="documentation-site"><a class="anchor" href="#documentation-site" aria-label="Anchor link">#</a>Documentation site</h2>
-<p>The Markdown sources and generated GitHub Pages site live in <code>docs/</code>.</p>
-<pre><code class="language-bash"><span class="hl-cmd">npm</span> install
+<p>The Markdown sources and generated GitHub Pages site live in <code>docs/</code>. Use Node.js 24 LTS for documentation and snapshot tooling.</p>
+<pre><code class="language-bash"><span class="hl-cmd">npm</span> ci
 <span class="hl-cmd">make</span> docs-site</code></pre>
 <p>The builder generates HTML and <code>llms.txt</code> together and validates local links. Commit the regenerated files with Markdown changes. The Markdown renderer, syntax highlighter, and shared HTML escaping live in separate <code>scripts/docs-*.mjs</code> modules.</p>
 <h2 id="ghostty-web-snapshot"><a class="anchor" href="#ghostty-web-snapshot" aria-label="Anchor link">#</a>Ghostty web snapshot</h2>

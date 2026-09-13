@@ -8,9 +8,17 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GOTOOLCHAIN: local
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -18,7 +26,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v7
         with:
-          go-version-file: go.mod
+          go-version: 1.27.1
 
       - name: Install tools
         run: |
@@ -32,4 +40,48 @@ jobs:
         run: golangci-lint run
 
       - name: Test
-        run: go test ./... -cover
+        run: go test -race ./... -cover
+
+      - name: CLI smoke
+        run: |
+          go build -o "$RUNNER_TEMP/gifgrep" ./cmd/gifgrep
+          "$RUNNER_TEMP/gifgrep" --help
+          "$RUNNER_TEMP/gifgrep" still gifdecode/testdata/animexample2.gif --at 0 -o "$RUNNER_TEMP/still.png"
+          "$RUNNER_TEMP/gifgrep" sheet gifdecode/testdata/animexample2.gif --frames 3 -o "$RUNNER_TEMP/sheet.png"
+
+  compatibility:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            go: 1.26.8
+          - os: macos-latest
+            go: 1.27.1
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ matrix.go }}
+      - run: go test ./...
+      - name: CLI smoke
+        run: |
+          go build -o "$RUNNER_TEMP/gifgrep" ./cmd/gifgrep
+          "$RUNNER_TEMP/gifgrep" --version
+          "$RUNNER_TEMP/gifgrep" still gifdecode/testdata/animexample2.gif --at 0 -o "$RUNNER_TEMP/still.png"
+
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run docs-site
+      - name: Check generated documentation
+        run: git diff --exit-code -- docs

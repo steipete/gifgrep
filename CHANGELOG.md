@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Compatibility: source builds now require Go 1.26, the oldest maintained Go line, for the updated terminal/system dependencies; prebuilt binary usage is unchanged.
+- Dependencies: update x/term to 0.46.0, x/sys to 0.48.0, and Playwright to 1.63.0; test Linux/macOS, the minimum Go line, race detection, built CLI commands, and generated docs in CI.
 - Docs: correct search formats, thumbnail flags, optional JSON fields, and terminal preview behavior; keep the generated site in sync.
 
 ## 0.4.1 - 2026-09-11

@@ -22,7 +22,7 @@ This is the recommended path — `brew upgrade` will pick up new releases.
 go install github.com/steipete/gifgrep/cmd/gifgrep@latest
 ```
 
-You'll need Go ≥ 1.25 and `$(go env GOPATH)/bin` on your `PATH`.
+You'll need Go ≥ 1.26 and `$(go env GOPATH)/bin` on your `PATH`.
 
 ## Pre-built binaries
 

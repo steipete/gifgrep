@@ -7,6 +7,8 @@ description: "Build gifgrep, regenerate its docs, and capture the Ghostty web sn
 
 ## Go workflow
 
+Source builds require Go 1.26 or newer; `go.mod` pins the default development toolchain. CI tests the minimum supported Go line on Linux and the pinned toolchain on Linux/macOS, with race detection on Linux.
+
 Run the test suite and static checks before submitting a change:
 
 ```bash
@@ -17,10 +19,10 @@ make gifgrep -- --help
 
 ## Documentation site
 
-The Markdown sources and generated GitHub Pages site live in `docs/`.
+The Markdown sources and generated GitHub Pages site live in `docs/`. Use Node.js 24 LTS for documentation and snapshot tooling.
 
 ```bash
-npm install
+npm ci
 make docs-site
 ```
 
