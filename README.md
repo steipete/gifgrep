@@ -2,7 +2,7 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/steipete/gifgrep/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/steipete/gifgrep/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/steipete/gifgrep?style=flat-square)](https://github.com/steipete/gifgrep/releases/latest)
-[![Go](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev/)
+[![Go](https://img.shields.io/badge/Go-1.26%2B-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev/)
 [![License](https://img.shields.io/github/license/steipete/gifgrep?style=flat-square)](LICENSE)
 [![Homebrew](https://img.shields.io/badge/Homebrew-steipete%2Ftap-FBB040?style=flat-square&logo=homebrew&logoColor=black)](https://github.com/steipete/homebrew-tap/blob/main/Formula/gifgrep.rb)
 [![Docs](https://img.shields.io/badge/docs-gifgrep.com-6f42c1?style=flat-square)](https://gifgrep.com)
@@ -32,7 +32,7 @@ Homebrew is the shortest path on macOS and Linux:
 brew install steipete/tap/gifgrep
 ```
 
-With Go 1.25 or newer:
+With Go 1.26 or newer:
 
 ```bash
 go install github.com/steipete/gifgrep/cmd/gifgrep@latest
