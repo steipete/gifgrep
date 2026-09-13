@@ -62,20 +62,8 @@ func loadSelectedImage(state *appState) {
 		}
 		w, h := gifSize(data)
 		entry = &gifCacheEntry{RawGIF: data, Width: w, Height: h}
-		if inlineNeedsDecodedFrames(state.inline) {
-			decoded, err := gifdecode.Decode(data, gifdecode.DefaultOptions())
-			if err != nil {
-				state.status = "Image error: " + err.Error()
-				state.currentAnim = nil
-				return
-			}
-			entry.Frames = decoded
-			entry.Width = decoded.Width
-			entry.Height = decoded.Height
-		}
-		state.cache[source] = entry
 	}
-	if entry != nil && entry.Frames == nil && inlineNeedsDecodedFrames(state.inline) {
+	if entry.Frames == nil && inlineNeedsDecodedFrames(state.inline) {
 		decoded, err := gifdecode.Decode(entry.RawGIF, gifdecode.DefaultOptions())
 		if err != nil {
 			state.status = "Image error: " + err.Error()
@@ -87,21 +75,18 @@ func loadSelectedImage(state *appState) {
 		entry.Height = decoded.Height
 	}
 
+	state.cache[source] = entry
+
 	var frames []gifdecode.Frame
-	if entry != nil && entry.Frames != nil {
+	if entry.Frames != nil {
 		frames = entry.Frames.Frames
 	}
 	state.currentAnim = &gifAnimation{
 		ID:     state.nextImageID,
-		RawGIF: nil,
+		RawGIF: entry.RawGIF,
 		Frames: frames,
-		Width:  0,
-		Height: 0,
-	}
-	if entry != nil {
-		state.currentAnim.RawGIF = entry.RawGIF
-		state.currentAnim.Width = entry.Width
-		state.currentAnim.Height = entry.Height
+		Width:  entry.Width,
+		Height: entry.Height,
 	}
 	state.nextImageID++
 	state.ansiFrames = nil

@@ -8,14 +8,14 @@ import (
 )
 
 func TestHelpers(t *testing.T) {
-	if truncateRunes("héllö", 3) != "hél" {
-		t.Fatalf("truncateRunes failed")
+	if truncateANSI("héllö", 3) != "hél" {
+		t.Fatalf("truncateANSI failed")
 	}
-	if truncateRunes("hello", 0) != "" {
-		t.Fatalf("truncateRunes width 0 failed")
+	if truncateANSI("hello", 0) != "" {
+		t.Fatalf("truncateANSI width 0 failed")
 	}
-	if runeLen("héllö") != 5 {
-		t.Fatalf("runeLen failed")
+	if visibleRuneLen("héllö") != 5 {
+		t.Fatalf("visibleRuneLen failed")
 	}
 	var buf bytes.Buffer
 	out := bufio.NewWriter(&buf)
@@ -38,12 +38,6 @@ func TestHelpers(t *testing.T) {
 	_ = out.Flush()
 	if !strings.Contains(buf.String(), "\x1b[1;1H") {
 		t.Fatalf("expected clamped cursor move")
-	}
-	if maxInt(3, 2) != 3 || maxInt(1, 4) != 4 {
-		t.Fatalf("max failed")
-	}
-	if minInt(3, 2) != 2 || minInt(1, 4) != 1 {
-		t.Fatalf("min failed")
 	}
 
 	t.Setenv("GIFGREP_CELL_ASPECT", "0.7")

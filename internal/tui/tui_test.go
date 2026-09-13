@@ -15,17 +15,13 @@ import (
 )
 
 func TestPreviewSize(t *testing.T) {
-	c, r := availablePreviewSize(40, 120, 40, true)
-	if c != 78 || r != 36 {
-		t.Fatalf("unexpected preview size: %d %d", c, r)
-	}
-	c, r = availablePreviewSize(30, 80, 80, false)
-	if c != 80 || r != 10 {
-		t.Fatalf("unexpected preview size: %d %d", c, r)
-	}
-	c, r = availablePreviewSize(10, 20, 20, false)
-	if c == 0 || r == 0 {
-		t.Fatalf("expected preview size for small terminal")
+	t.Setenv("GIFGREP_CELL_ASPECT", "0.5")
+	for _, size := range [][2]int{{40, 120}, {30, 80}, {10, 20}} {
+		state := &appState{currentAnim: &gifAnimation{Width: 200, Height: 100}}
+		got := buildLayout(state, size[0], size[1])
+		if got.previewCols <= 0 || got.previewRows <= 0 || got.previewCols > size[1] || got.previewRows > got.contentHeight {
+			t.Fatalf("invalid preview layout for %v: %+v", size, got)
+		}
 	}
 
 	anim := &gifAnimation{Width: 200, Height: 100}

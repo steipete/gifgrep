@@ -9,17 +9,6 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-func truncateRunes(s string, width int) string {
-	if width <= 0 {
-		return ""
-	}
-	runes := []rune(s)
-	if len(runes) <= width {
-		return s
-	}
-	return string(runes[:width])
-}
-
 func truncateANSI(s string, width int) string {
 	if width <= 0 {
 		return ""
@@ -43,9 +32,6 @@ func truncateANSI(s string, width int) string {
 			continue
 		}
 		r, size := utf8.DecodeRuneInString(s[i:])
-		if r == utf8.RuneError && size == 1 {
-			size = 1
-		}
 		w := runewidth.RuneWidth(r)
 		if w < 0 {
 			w = 0
@@ -89,24 +75,6 @@ func visibleRuneLen(s string) int {
 		i += size
 	}
 	return visible
-}
-
-func runeLen(s string) int {
-	return len([]rune(s))
-}
-
-func maxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func minInt(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 func cellAspectRatio() float64 {
