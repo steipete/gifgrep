@@ -33,7 +33,7 @@ func TestCopySelectedUsesTempPath(t *testing.T) {
 		selected:  0,
 		lastRows:  24,
 		lastCols:  80,
-		tempPaths: map[string]string{"id:1": tmp.Name()},
+		tempPaths: map[string]string{"url:https://example.test/1.gif": tmp.Name()},
 		cache:     map[string]*gifCacheEntry{},
 	}
 
@@ -69,7 +69,7 @@ func TestCopySelectedUsesSavedPath(t *testing.T) {
 		selected:   0,
 		lastRows:   24,
 		lastCols:   80,
-		savedPaths: map[string]string{"id:1": tmp.Name()},
+		savedPaths: map[string]string{"url:https://example.test/1.gif": tmp.Name()},
 		tempPaths:  map[string]string{},
 		cache:      map[string]*gifCacheEntry{},
 	}
@@ -147,7 +147,7 @@ func TestCopySelectedHandlesError(t *testing.T) {
 		selected:  0,
 		lastRows:  24,
 		lastCols:  80,
-		tempPaths: map[string]string{"id:1": tmp.Name()},
+		tempPaths: map[string]string{"url:https://example.test/1.gif": tmp.Name()},
 		cache:     map[string]*gifCacheEntry{},
 	}
 

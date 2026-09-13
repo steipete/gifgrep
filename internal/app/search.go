@@ -23,7 +23,7 @@ func runSearch(stdout io.Writer, stderr io.Writer, opts model.Options, query str
 	}
 	logSearchConfig(stderr, opts)
 
-	results, err := search.Search(query, opts)
+	results, _, err := search.Search(query, opts)
 	if err != nil {
 		return err
 	}

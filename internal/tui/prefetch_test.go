@@ -1,6 +1,9 @@
 package tui
 
 import (
+	"bytes"
+	"context"
+	"math"
 	"os"
 	"testing"
 
@@ -12,7 +15,7 @@ func TestPrefetchGIFToTempRespectsSize(t *testing.T) {
 	rt := &testutil.FakeTransport{GIFData: data}
 	testutil.WithTransport(t, rt, func() {
 		dir := t.TempDir()
-		path, err := prefetchGIFToTemp("https://example.test/full.gif", dir, int64(len(data)+1))
+		path, err := prefetchGIFToTemp(context.Background(), "https://example.test/full.gif", dir, int64(len(data)+1))
 		if err != nil {
 			t.Fatalf("prefetch failed: %v", err)
 		}
@@ -20,8 +23,16 @@ func TestPrefetchGIFToTempRespectsSize(t *testing.T) {
 			t.Fatalf("missing temp file: %v", err)
 		}
 
-		if _, err := prefetchGIFToTemp("https://example.test/full.gif", dir, int64(len(data)-1)); err == nil {
+		if _, err := prefetchGIFToTemp(context.Background(), "https://example.test/full.gif", dir, int64(len(data)-1)); err == nil {
 			t.Fatalf("expected size cap error")
+		}
+		path, err = prefetchGIFToTemp(context.Background(), "https://example.test/full.gif", dir, math.MaxInt64)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := os.ReadFile(path)
+		if err != nil || !bytes.Equal(got, data) {
+			t.Fatalf("maximum byte limit lost download data: %v", err)
 		}
 	})
 }

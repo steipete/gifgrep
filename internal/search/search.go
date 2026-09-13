@@ -8,24 +8,23 @@ import (
 	"github.com/steipete/gifgrep/internal/model"
 )
 
-func Search(query string, opts model.Options) ([]model.Result, error) {
+func Search(query string, opts model.Options) ([]model.Result, string, error) {
 	source := ResolveSource(opts.Source)
-	if source == "giphy" && isAutoSource(opts.Source) && os.Getenv("KLIPY_API_KEY") != "" {
-		results, err := fetchGiphyV1(query, opts)
-		if err == nil {
-			return results, nil
-		}
-		return fetchKlipyV2(query, opts)
-	}
-
+	var results []model.Result
+	var err error
 	switch source {
 	case "klipy":
-		return fetchKlipyV2(query, opts)
+		results, err = fetchKlipyV2(query, opts)
 	case "giphy":
-		return fetchGiphyV1(query, opts)
+		results, err = fetchGiphyV1(query, opts)
 	default:
-		return nil, fmt.Errorf("unknown source: %s", opts.Source)
+		return nil, source, fmt.Errorf("unknown source: %s", opts.Source)
 	}
+	if err != nil && source == "giphy" && isAutoSource(opts.Source) && os.Getenv("KLIPY_API_KEY") != "" {
+		source = "klipy"
+		results, err = fetchKlipyV2(query, opts)
+	}
+	return results, source, err
 }
 
 func isAutoSource(source string) bool {

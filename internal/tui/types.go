@@ -1,6 +1,8 @@
 package tui
 
 import (
+	"context"
+	"sync"
 	"time"
 
 	"github.com/steipete/gifgrep/gifdecode"
@@ -38,31 +40,35 @@ type ansiFrameKey struct {
 }
 
 type appState struct {
-	query         string
-	tagline       string
-	headerFlash   string
-	headerFlashAt time.Time
-	results       []model.Result
-	selected      int
-	scroll        int
-	mode          mode
-	status        string
-	currentAnim   *gifAnimation
-	inline        termcaps.InlineProtocol
-	cache         map[string]*gifCacheEntry
-	ansiFrames    map[ansiFrameKey][]byte
-	savedPaths    map[string]string
-	tempPaths     map[string]string
-	tempDir       string
-	prefetchGen   int
-	prefetching   map[string]bool
-	renderDirty   bool
-	lastShowRight bool
-	lastRows      int
-	lastCols      int
-	previewRow    int
-	previewCol    int
-	lastPreview   struct {
+	source         string
+	query          string
+	tagline        string
+	headerFlash    string
+	headerFlashAt  time.Time
+	results        []model.Result
+	selected       int
+	scroll         int
+	mode           mode
+	status         string
+	currentAnim    *gifAnimation
+	inline         termcaps.InlineProtocol
+	cache          map[string]*gifCacheEntry
+	ansiFrames     map[ansiFrameKey][]byte
+	savedPaths     map[string]string
+	tempPaths      map[string]string
+	tempDir        string
+	prefetchGen    int
+	prefetchCancel context.CancelFunc
+	prefetchCtx    context.Context
+	prefetchWG     sync.WaitGroup
+	prefetching    map[string]bool
+	renderDirty    bool
+	lastShowRight  bool
+	lastRows       int
+	lastCols       int
+	previewRow     int
+	previewCol     int
+	lastPreview    struct {
 		cols int
 		rows int
 	}
@@ -83,5 +89,4 @@ type appState struct {
 	useColor              bool
 	opts                  model.Options
 	giphyAttributionShown bool
-	lastSavedPath         string
 }

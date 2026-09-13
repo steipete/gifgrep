@@ -51,7 +51,7 @@ type SearchCmd struct {
 	Number   bool   `help:"Prefix lines with 1-based index." short:"n"`
 	Download bool   `help:"Download results to ~/Downloads."`
 	Format   string `help:"Output format." enum:"auto,plain,tsv,md,url,comment,json" default:"auto"`
-	Thumbs   string `help:"Inline thumbnails (Kitty protocol / iTerm2 images; TTY only)." enum:"auto,always,never" default:"auto"`
+	Thumbs   string `help:"Inline thumbnails (Kitty / iTerm2 / Sixel; TTY only)." enum:"auto,always,never" default:"auto"`
 
 	Query []string `arg:"" name:"query" help:"Search query."`
 }

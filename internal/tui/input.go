@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 )
@@ -26,52 +27,104 @@ const (
 	keyUnknown
 )
 
-func readInput(r io.Reader, ch chan<- inputEvent, stop <-chan struct{}) {
-	reader := bufio.NewReader(r)
-	for {
-		select {
-		case <-stop:
-			return
-		default:
-		}
+type inputRune struct {
+	value rune
+	size  int
+}
 
-		r, size, err := reader.ReadRune()
-		if err != nil {
-			return
-		}
-		switch r {
-		case 0x03:
-			ch <- inputEvent{kind: keyCtrlC}
-		case '\r', '\n':
-			ch <- inputEvent{kind: keyEnter}
-		case 0x7f, 0x08:
-			ch <- inputEvent{kind: keyBackspace}
-		case 0x1b:
-			next, err := reader.ReadByte()
+func readInput(r io.Reader, ch chan<- inputEvent, stop <-chan struct{}) {
+	runes := make(chan inputRune)
+	done := make(chan struct{})
+	defer close(done)
+	go func() {
+		defer close(runes)
+		reader := bufio.NewReader(r)
+		for {
+			value, size, err := reader.ReadRune()
 			if err != nil {
-				ch <- inputEvent{kind: keyEsc}
+				return
+			}
+			select {
+			case runes <- inputRune{value, size}:
+			case <-stop:
+				return
+			case <-done:
+				return
+			}
+		}
+	}()
+
+	var pending *inputRune
+	for {
+		var next inputRune
+		if pending != nil {
+			next = *pending
+			pending = nil
+		} else {
+			var ok bool
+			next, ok = nextInputRune(runes, stop, nil)
+			if !ok {
+				return
+			}
+		}
+		var ev inputEvent
+		switch next.value {
+		case 0x03:
+			ev.kind = keyCtrlC
+		case '\r', '\n':
+			ev.kind = keyEnter
+		case 0x7f, 0x08:
+			ev.kind = keyBackspace
+		case 0x1b:
+			ev, pending = readEscape(runes, stop)
+		default:
+			if unicode.IsControl(next.value) || (next.value == utf8.RuneError && next.size == 1) {
 				continue
 			}
-			if next == '[' {
-				third, _ := reader.ReadByte()
-				switch third {
-				case 'A':
-					ch <- inputEvent{kind: keyUp}
-				case 'B':
-					ch <- inputEvent{kind: keyDown}
-				default:
-					ch <- inputEvent{kind: keyUnknown}
-				}
-			} else {
-				_ = reader.UnreadByte()
-				ch <- inputEvent{kind: keyEsc}
-			}
-		default:
-			if !unicode.IsControl(r) && (r != utf8.RuneError || size > 1) {
-				ch <- inputEvent{kind: keyRune, ch: r}
-			}
+			ev = inputEvent{kind: keyRune, ch: next.value}
+		}
+		select {
+		case ch <- ev:
+		case <-stop:
+			return
 		}
 	}
+}
+
+func nextInputRune(runes <-chan inputRune, stop <-chan struct{}, timeout <-chan time.Time) (inputRune, bool) {
+	select {
+	case r, ok := <-runes:
+		return r, ok
+	case <-stop:
+		return inputRune{}, false
+	case <-timeout:
+		return inputRune{}, false
+	}
+}
+
+func readEscape(runes <-chan inputRune, stop <-chan struct{}) (inputEvent, *inputRune) {
+	// A lone Escape must complete without waiting indefinitely for a CSI sequence.
+	timer := time.NewTimer(100 * time.Millisecond)
+	defer timer.Stop()
+	next, ok := nextInputRune(runes, stop, timer.C)
+	if !ok {
+		return inputEvent{kind: keyEsc}, nil
+	}
+	if next.value != '[' {
+		return inputEvent{kind: keyEsc}, &next
+	}
+	third, ok := nextInputRune(runes, stop, timer.C)
+	if ok {
+		switch third.value {
+		case 0x03:
+			return inputEvent{kind: keyCtrlC}, nil
+		case 'A':
+			return inputEvent{kind: keyUp}, nil
+		case 'B':
+			return inputEvent{kind: keyDown}, nil
+		}
+	}
+	return inputEvent{kind: keyUnknown}, nil
 }
 
 func handleInput(state *appState, ev inputEvent, out *bufio.Writer, prefetchCh chan<- prefetchResult) bool {
@@ -153,14 +206,12 @@ func handleBrowseInput(state *appState, ev inputEvent, out *bufio.Writer) bool {
 	case keyUp:
 		if state.selected > 0 {
 			state.selected--
-			ensureVisible(state)
 			loadSelectedImage(state)
 			state.renderDirty = true
 		}
 	case keyDown:
 		if state.selected < len(state.results)-1 {
 			state.selected++
-			ensureVisible(state)
 			loadSelectedImage(state)
 			state.renderDirty = true
 		}

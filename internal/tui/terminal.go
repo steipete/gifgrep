@@ -19,16 +19,6 @@ func writeLineAt(out *bufio.Writer, row, col int, text string, width int) {
 	_, _ = fmt.Fprint(out, "\x1b[K")
 }
 
-func writeLine(out *bufio.Writer, text string, width int) {
-	if width <= 0 {
-		_, _ = fmt.Fprint(out, "\r\n")
-		return
-	}
-	text = truncateANSI(text, width)
-	_, _ = fmt.Fprint(out, text)
-	_, _ = fmt.Fprint(out, "\x1b[K\r\n")
-}
-
 func moveCursor(out *bufio.Writer, row, col int) {
 	if row < 1 {
 		row = 1

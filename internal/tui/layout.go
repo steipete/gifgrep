@@ -4,11 +4,8 @@ import (
 	"math"
 )
 
-func ensureVisible(state *appState) {
-	listHeight := state.lastRows - 4
-	if listHeight < 0 {
-		listHeight = 0
-	}
+func ensureVisible(state *appState, listHeight int) {
+	listHeight = max(1, listHeight)
 	if state.selected < state.scroll {
 		state.scroll = state.selected
 	}

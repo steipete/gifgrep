@@ -20,7 +20,7 @@ type report struct {
 func main() {
 	var expect string
 	var asJSON bool
-	flag.StringVar(&expect, "expect", "", "Expected protocol: none|kitty|iterm (optional)")
+	flag.StringVar(&expect, "expect", "", "Expected protocol: none|kitty|iterm|sixel|ansi (optional)")
 	flag.BoolVar(&asJSON, "json", true, "Emit JSON")
 	flag.Parse()
 
