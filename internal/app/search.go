@@ -34,19 +34,19 @@ func runSearch(stdout io.Writer, stderr io.Writer, opts model.Options, query str
 
 	format := resolveOutputFormat(opts, stdout)
 	out := bufio.NewWriter(stdout)
-	defer func() { _ = out.Flush() }()
 	if format == formatJSON {
 		enc := json.NewEncoder(out)
 		enc.SetIndent("", "  ")
-		return enc.Encode(results)
+		if err := enc.Encode(results); err != nil {
+			return err
+		}
+	} else {
+		useColor := shouldUseColor(opts, stdout)
+		thumbs := thumbsProtocol(opts, stdout, format)
+		termCols := termColumns(stdout, thumbs)
+		writeSearchResults(out, opts, useColor, thumbs, results, termCols, format)
 	}
-
-	useColor := shouldUseColor(opts, stdout)
-	thumbs := thumbsProtocol(opts, stdout, format)
-	termCols := termColumns(stdout, thumbs)
-
-	writeSearchResults(out, opts, useColor, thumbs, results, termCols, format)
-	return nil
+	return out.Flush()
 }
 
 func logSearchConfig(stderr io.Writer, opts model.Options) {

@@ -2,6 +2,7 @@ package search
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -17,6 +18,11 @@ func fetchSearchJSON(endpoint string, params url.Values, dest any) error {
 	req.Header.Set("User-Agent", "gifgrep")
 	resp, err := client.Do(req)
 	if err != nil {
+		var requestErr *url.Error
+		if errors.As(err, &requestErr) {
+			// Provider URLs carry API keys and queries; retain only the public endpoint.
+			return &url.Error{Op: requestErr.Op, URL: endpoint, Err: requestErr.Err}
+		}
 		return err
 	}
 	defer func() { _ = resp.Body.Close() }()
