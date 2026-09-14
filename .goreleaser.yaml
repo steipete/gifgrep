@@ -1,0 +1,39 @@
+version: 2
+
+project_name: gifgrep
+
+changelog:
+  disable: true
+
+builds:
+  - id: gifgrep
+    main: ./cmd/gifgrep
+    binary: gifgrep
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X github.com/steipete/gifgrep/internal/model.Version={{ .Version }}
+    env:
+      - CGO_ENABLED=0
+      - MACOSX_DEPLOYMENT_TARGET=13.0
+    targets:
+      - darwin_amd64
+      - darwin_arm64
+      - linux_amd64
+      - linux_arm64
+    hooks:
+      post:
+        - cmd: ./scripts/check-macos-target "{{ .Path }}" "{{ .Os }}"
+
+archives:
+  - ids:
+      - gifgrep
+    formats:
+      - tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: SHA256SUMS

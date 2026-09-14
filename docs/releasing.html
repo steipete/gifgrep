@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Development — gifgrep</title>
-  <meta name="description" content="Build gifgrep, regenerate its docs, and capture the Ghostty web snapshot.">
-  <link rel="canonical" href="https://gifgrep.com/development.html">
+  <title>Releasing — gifgrep</title>
+  <meta name="description" content="Ship signed and notarized gifgrep binaries with the shared release workflow.">
+  <link rel="canonical" href="https://gifgrep.com/releasing.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="gifgrep">
-  <meta property="og:title" content="Development — gifgrep">
-  <meta property="og:description" content="Build gifgrep, regenerate its docs, and capture the Ghostty web snapshot.">
-  <meta property="og:url" content="https://gifgrep.com/development.html">
+  <meta property="og:title" content="Releasing — gifgrep">
+  <meta property="og:description" content="Ship signed and notarized gifgrep binaries with the shared release workflow.">
+  <meta property="og:url" content="https://gifgrep.com/releasing.html">
   <meta property="og:image" content="https://gifgrep.com/assets/gifgrep-tui.png">
   <meta property="og:image:width" content="1824">
   <meta property="og:image:height" content="1209">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Development — gifgrep">
-  <meta name="twitter:description" content="Build gifgrep, regenerate its docs, and capture the Ghostty web snapshot.">
+  <meta name="twitter:title" content="Releasing — gifgrep">
+  <meta name="twitter:description" content="Ship signed and notarized gifgrep binaries with the shared release workflow.">
   <meta name="twitter:image" content="https://gifgrep.com/assets/gifgrep-tui.png">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -258,33 +258,52 @@ body:not(.home) .doc>h1:first-child{display:none}
       <header class="hero">
         <div class="hero-text">
           <p class="eyebrow">Reference</p>
-          <h1>Development</h1>
+          <h1>Releasing</h1>
         </div>
         <div class="hero-meta">
           <a class="repo" href="https://github.com/steipete/gifgrep" rel="noopener">GitHub</a>
-          <a class="edit" href="https://github.com/steipete/gifgrep/edit/main/docs/development.md" rel="noopener">Edit page</a>
+          <a class="edit" href="https://github.com/steipete/gifgrep/edit/main/docs/releasing.md" rel="noopener">Edit page</a>
         </div>
       </header>
       <div class="doc-grid">
-        <article class="doc"><h1 id="development">Development</h1>
-<h2 id="go-workflow"><a class="anchor" href="#go-workflow" aria-label="Anchor link">#</a>Go workflow</h2>
-<p>Source builds require Go 1.26 or newer; <code>go.mod</code> pins the default development toolchain. CI tests the minimum supported Go line on Linux and the pinned toolchain on Linux/macOS, with race detection on Linux.</p>
-<p>Run the test suite and static checks before submitting a change:</p>
-<pre><code class="language-bash"><span class="hl-cmd">make</span> test
-<span class="hl-cmd">make</span> check
-<span class="hl-cmd">make</span> <span class="hl-cmd">gifgrep</span> -- <span class="hl-f">--help</span></code></pre>
-<p>Release maintainers should follow <a href="releasing.html">Releasing</a> for the signed build, verification, and Homebrew handoff.</p>
-<h2 id="documentation-site"><a class="anchor" href="#documentation-site" aria-label="Anchor link">#</a>Documentation site</h2>
-<p>The Markdown sources and generated GitHub Pages site live in <code>docs/</code>. Use Node.js 24 LTS for documentation and snapshot tooling.</p>
-<pre><code class="language-bash"><span class="hl-cmd">npm</span> ci
-<span class="hl-cmd">make</span> docs-site</code></pre>
-<p>The builder generates HTML and <code>llms.txt</code> together and validates local links. Commit the regenerated files with Markdown changes. The Markdown renderer, syntax highlighter, and shared HTML escaping live in separate <code>scripts/docs-*.mjs</code> modules.</p>
-<h2 id="ghostty-web-snapshot"><a class="anchor" href="#ghostty-web-snapshot" aria-label="Anchor link">#</a>Ghostty web snapshot</h2>
-<p>Install Playwright&#39;s Chromium build once, then run the snapshot target:</p>
-<pre><code class="language-bash">npx playwright install chromium
-<span class="hl-cmd">make</span> snap</code></pre>
-<p><code>make snap</code> starts the Ghostty web demo, runs the TUI with the KLIPY provider, and writes <code>ghostty-web-snap.png</code> at the repository root. It requires <code>KLIPY_API_KEY</code> in the shell environment.</p></article>
-        <nav class="toc" aria-label="On this page"><h2>On this page</h2><a class="toc-l2" href="#go-workflow">Go workflow</a><a class="toc-l2" href="#documentation-site">Documentation site</a><a class="toc-l2" href="#ghostty-web-snapshot">Ghostty web snapshot</a></nav>
+        <article class="doc"><h1 id="releasing">Releasing</h1>
+<p>The <code>Release</code> workflow calls the Go CLI archetype from <code>openclaw/release-workflows</code>, pinned to v1.9.0 (<code>f613cbfed2b043159c850c353e7facb8c89833b0</code>). Its <code>personal</code> policy requires <strong>Developer ID Application: Peter Steinberger (Y5PE65HELJ)</strong> and the identifier <code>com.steipete.gifgrep.gifgrep</code>.</p>
+<h2 id="prepare"><a class="anchor" href="#prepare" aria-label="Anchor link">#</a>Prepare</h2>
+<p>Merge the release changes through a reviewed PR with green CI. Finalize the versioned <code>Unreleased</code> changelog section with its date and highlights. Update <code>internal/model/types.go</code>, <code>package.json</code>, <code>package-lock.json</code>, and the installation version example, then regenerate the docs with <code>make docs-site</code>.</p>
+<p>Run the local gate on macOS:</p>
+<pre><code class="language-bash">actionlint
+./scripts/check-release-metadata
+test <span class="hl-f">-z</span> <span class="hl-s">&quot;$(gofumpt -l .)&quot;</span>
+<span class="hl-cmd">make</span> lint test check
+goreleaser check
+goreleaser release <span class="hl-f">--snapshot</span> <span class="hl-f">--clean</span> <span class="hl-f">--skip</span>=publish <span class="hl-f">--parallelism</span>=<span class="hl-n">2</span></code></pre>
+<p>The four targets remain <code>darwin_amd64</code>, <code>darwin_arm64</code>, <code>linux_amd64</code>, and <code>linux_arm64</code>. Archive names remain <code>gifgrep_&lt;version&gt;_&lt;target&gt;.tar.gz</code>, containing <code>gifgrep</code>, <code>README.md</code>, and <code>LICENSE</code>. <code>SHA256SUMS</code> replaces the old per-archive <code>.sha256</code> files. <code>ASSET-INVENTORY.json</code> binds each payload to the repository, tag, commit, size, and digest; <code>RELEASE-NOTES.md</code> contains the exact dated changelog section.</p>
+<h2 id="macos-minimum"><a class="anchor" href="#macos-minimum" aria-label="Anchor link">#</a>macOS minimum</h2>
+<p>Release binaries support <strong>macOS 13.0 or newer</strong>, the minimum emitted by the pinned Go 1.27 toolchain. GoReleaser uses <code>CGO_ENABLED=0</code> and <code>MACOSX_DEPLOYMENT_TARGET=13.0</code>; every Darwin build runs <code>scripts/check-macos-target</code>, which requires the actual Mach-O deployment target to equal 13.0. Both CI and release builds run on macOS so <code>otool</code> can inspect both architecture slices before publication.</p>
+<p>The environment variable alone does not prove the binary minimum. If cgo is introduced, also supply <code>-mmacosx-version-min=13.0</code> in the C compiler and linker flags and keep this artifact check. Do not let the runner SDK silently raise the minimum.</p>
+<h2 id="dispatch"><a class="anchor" href="#dispatch" aria-label="Anchor link">#</a>Dispatch</h2>
+<p>The repository must protect <code>main</code>, allow Actions read/write workflow permissions, and enable <code>can_approve_pull_request_reviews</code> so the workflow can open its closeout PR. Each workflow still declares its own limited permissions.</p>
+<p>Provision these repository secrets: <code>MACOS_SIGN_P12</code>, <code>MACOS_SIGN_P12_PASSWORD</code>, <code>ASC_KEY_ID</code>, <code>ASC_ISSUER_ID</code>, <code>ASC_PRIVATE_KEY</code>, and <code>HOMEBREW_TAP_TOKEN</code>. The caller maps them to the shared workflow&#39;s signing and tap inputs. The tap token needs Contents read and Actions write access to <code>steipete/homebrew-tap</code>.</p>
+<p>After the release PR merges, wait for CI on the exact <code>main</code> commit. Recheck the latest releases and local/remote tags; if the requested tag already exists, investigate the existing run instead of starting a new release.</p>
+<pre><code class="language-bash"><span class="hl-cmd">gh</span> release list <span class="hl-f">--repo</span> steipete/<span class="hl-cmd">gifgrep</span> <span class="hl-f">--limit</span> <span class="hl-n">3</span> <span class="hl-f">--json</span> tagName
+<span class="hl-cmd">git</span> fetch origin <span class="hl-f">--tags</span>
+<span class="hl-cmd">git</span> tag <span class="hl-f">--list</span> <span class="hl-s">&#39;v&lt;version&gt;&#39;</span>
+<span class="hl-cmd">gh</span> workflow run release.yml <span class="hl-f">--repo</span> steipete/<span class="hl-cmd">gifgrep</span> <span class="hl-f">--ref</span> main <span class="hl-f">-f</span> version=&lt;version&gt;</code></pre>
+<p>Do not create or push the tag manually. The shared workflow freezes the protected head, checks its CI and metadata, and creates an annotated tag. It builds without signing secrets, signs and notarizes the frozen Darwin binaries in a separate job, then independently verifies immutable release bytes on Intel and Apple Silicon. The publisher requires both attestations and re-downloads the draft assets to verify exact byte equality before publication. A failed run can be rerun against its frozen annotated tag; never move or replace that tag.</p>
+<p>The Homebrew handoff dispatches <code>steipete/homebrew-tap</code> with the verified asset mapping, waits for the update, and verifies the formula URLs and hashes. After success, review and merge the workflow&#39;s next-Unreleased PR, preserving the versioned changelog convention.</p>
+<h2 id="verify-the-release"><a class="anchor" href="#verify-the-release" aria-label="Anchor link">#</a>Verify the release</h2>
+<p>Download all assets fresh, verify <code>shasum -a 256 -c SHA256SUMS</code>, compare REST asset digests and inventory with the tagged commit, and compare the release body to <code>RELEASE-NOTES.md</code> and the finalized changelog section. For a downloaded macOS binary:</p>
+<pre><code class="language-bash">xattr <span class="hl-f">-l</span> ./<span class="hl-cmd">gifgrep</span>
+codesign <span class="hl-f">-dvv</span> ./<span class="hl-cmd">gifgrep</span>
+codesign <span class="hl-f">--verify</span> <span class="hl-f">--deep</span> <span class="hl-f">--strict</span> <span class="hl-f">--verbose</span>=<span class="hl-n">4</span> ./<span class="hl-cmd">gifgrep</span>
+codesign <span class="hl-f">--verify</span> <span class="hl-f">--strict</span> <span class="hl-f">--check-notarization</span> <span class="hl-f">-R</span>=notarized ./<span class="hl-cmd">gifgrep</span>
+spctl <span class="hl-f">-a</span> <span class="hl-f">-vv</span> <span class="hl-f">-t</span> open <span class="hl-f">--context</span> context:primary-signature ./<span class="hl-cmd">gifgrep</span>
+otool <span class="hl-f">-l</span> ./<span class="hl-cmd">gifgrep</span> | grep <span class="hl-f">-A5</span> LC_BUILD_VERSION
+./<span class="hl-cmd">gifgrep</span> <span class="hl-f">--version</span></code></pre>
+<p>The <code>spctl</code> command uses the primary-signature <strong>open</strong> context, which accepts notarized bare CLIs. Do not substitute <code>--type execute</code>: that assessment expects an app bundle and can reject a valid CLI. Online <code>codesign --check-notarization</code> remains the shared workflow&#39;s notarization gate.</p>
+<p>Use a quarantined download for the Gatekeeper execution check. <code>curl</code> does not necessarily set quarantine; if absent, explicitly apply <code>com.apple.quarantine</code> and record that it was added for the test. Do not remove quarantine to make the check pass. The expected authority is Peter Steinberger, team <code>Y5PE65HELJ</code>, and <code>minos</code> is <code>13.0</code>.</p>
+<p>Finally verify the Go proxy with <code>GOPROXY=https://proxy.golang.org go list -m github.com/steipete/gifgrep@v&lt;version&gt;</code> and upgrade the Homebrew formula, checking its installed version and signature. Leave the checkout clean on <code>main</code> at <code>origin/main</code>.</p></article>
+        <nav class="toc" aria-label="On this page"><h2>On this page</h2><a class="toc-l2" href="#prepare">Prepare</a><a class="toc-l2" href="#macos-minimum">macOS minimum</a><a class="toc-l2" href="#dispatch">Dispatch</a><a class="toc-l2" href="#verify-the-release">Verify the release</a></nav>
       </div>
     </main>
   </div>

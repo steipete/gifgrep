@@ -38,7 +38,7 @@ With Go 1.26 or newer:
 go install github.com/steipete/gifgrep/cmd/gifgrep@latest
 ```
 
-Prebuilt macOS and Linux binaries are available from [GitHub Releases](https://github.com/steipete/gifgrep/releases/latest).
+Prebuilt macOS and Linux binaries are available from [GitHub Releases](https://github.com/steipete/gifgrep/releases/latest). macOS downloads require macOS 13 or newer and are Developer ID signed by Peter Steinberger and notarized by Apple, so direct downloads pass Gatekeeper.
 
 ## Quick start
 

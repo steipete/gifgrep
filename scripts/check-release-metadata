@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+"""Keep the CLI, tool manifest, lockfile, and finalized changelog in sync."""
+import json
+from pathlib import Path
+import re
+import sys
+
+version = re.search(r'var Version = "([^"]+)"', Path("internal/model/types.go").read_text()).group(1)
+package = json.loads(Path("package.json").read_text())
+lock = json.loads(Path("package-lock.json").read_text())
+changelog = re.search(r"^## (\d+\.\d+\.\d+) - \d{4}-\d{2}-\d{2}$", Path("CHANGELOG.md").read_text(), re.MULTILINE)
+versions = [package["version"], lock["version"], lock["packages"][""]["version"], changelog.group(1) if changelog else None]
+if len(sys.argv) > 1:
+    versions.append(sys.argv[1].removeprefix("v"))
+if any(candidate != version for candidate in versions):
+    sys.exit(f"release metadata mismatch: CLI {version}, manifests/changelog/request {versions}")
+print(f"release metadata matches v{version}")

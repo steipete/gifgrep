@@ -17,6 +17,8 @@ make check
 make gifgrep -- --help
 ```
 
+Release maintainers should follow [Releasing](releasing.md) for the signed build, verification, and Homebrew handoff.
+
 ## Documentation site
 
 The Markdown sources and generated GitHub Pages site live in `docs/`. Use Node.js 24 LTS for documentation and snapshot tooling.

@@ -278,10 +278,11 @@ body:not(.home) .doc>h1:first-child{display:none}
 <h2 id="pre-built-binaries"><a class="anchor" href="#pre-built-binaries" aria-label="Anchor link">#</a>Pre-built binaries</h2>
 <p>Download for your platform from the <a href="https://github.com/steipete/gifgrep/releases/latest">latest release</a>:</p>
 <ul>
-<li>macOS (<code>darwin_amd64</code>, <code>darwin_arm64</code>)</li>
+<li>macOS 13 or newer (<code>darwin_amd64</code>, <code>darwin_arm64</code>)</li>
 <li>Linux (<code>linux_amd64</code>, <code>linux_arm64</code>)</li>
 </ul>
-<p>Unpack, drop the binary on your <code>PATH</code>, done.</p>
+<p>macOS release binaries are Developer ID signed by Peter Steinberger (team <code>Y5PE65HELJ</code>) and notarized by Apple, so direct downloads pass Gatekeeper. Source builds via <code>go install</code> do not carry this release signature.</p>
+<p>Unpack, drop the binary on your <code>PATH</code>, done. Download <code>SHA256SUMS</code> alongside the archive to check its SHA-256 digest; it replaces the old per-archive <code>.sha256</code> files.</p>
 <h2 id="from-source"><a class="anchor" href="#from-source" aria-label="Anchor link">#</a>From source</h2>
 <pre><code class="language-bash"><span class="hl-cmd">git</span> clone <span class="hl-url">https://github.com/steipete/gifgrep.git</span>
 <span class="hl-cmd">cd</span> <span class="hl-cmd">gifgrep</span>

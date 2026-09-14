@@ -28,10 +28,12 @@ You'll need Go ≥ 1.26 and `$(go env GOPATH)/bin` on your `PATH`.
 
 Download for your platform from the [latest release](https://github.com/steipete/gifgrep/releases/latest):
 
-- macOS (`darwin_amd64`, `darwin_arm64`)
+- macOS 13 or newer (`darwin_amd64`, `darwin_arm64`)
 - Linux (`linux_amd64`, `linux_arm64`)
 
-Unpack, drop the binary on your `PATH`, done.
+macOS release binaries are Developer ID signed by Peter Steinberger (team `Y5PE65HELJ`) and notarized by Apple, so direct downloads pass Gatekeeper. Source builds via `go install` do not carry this release signature.
+
+Unpack, drop the binary on your `PATH`, done. Download `SHA256SUMS` alongside the archive to check its SHA-256 digest; it replaces the old per-archive `.sha256` files.
 
 ## From source
 

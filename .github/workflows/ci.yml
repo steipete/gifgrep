@@ -85,3 +85,28 @@ jobs:
       - run: npm run docs-site
       - name: Check generated documentation
         run: git diff --exit-code -- docs
+
+  release-macos:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Check release metadata
+        run: |
+          ./scripts/check-release-metadata
+          python3 scripts/test-release-checks.py
+      - uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7
+        with:
+          version: '~> v2'
+          args: release --snapshot --clean --skip=publish --parallelism=2
+      - name: Check packaged CLI
+        run: |
+          mkdir "$RUNNER_TEMP/release-smoke"
+          tar -xzf dist/gifgrep_*_darwin_arm64.tar.gz -C "$RUNNER_TEMP/release-smoke"
+          ./scripts/check-macos-target "$RUNNER_TEMP/release-smoke/gifgrep" darwin
+          "$RUNNER_TEMP/release-smoke/gifgrep" --version

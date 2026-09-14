@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+"""Reject Darwin release binaries with an unexpected minimum macOS version."""
+import re
+import subprocess
+import sys
+
+if len(sys.argv) != 3:
+    sys.exit(f"usage: {sys.argv[0]} <binary> <goos>")
+if sys.argv[2] != "darwin":
+    sys.exit(0)
+
+output = subprocess.check_output(["otool", "-l", sys.argv[1]], text=True)
+targets = re.findall(
+    r"cmd LC_BUILD_VERSION\n(?:(?!Load command).)*?\bminos (\S+)"
+    r"|cmd LC_VERSION_MIN_MACOSX\n(?:(?!Load command).)*?\bversion (\S+)",
+    output, re.DOTALL,
+)
+versions = [modern or legacy for modern, legacy in targets]
+if not versions or any(version not in ("13.0", "13.0.0") for version in versions):
+    sys.exit(f"expected macOS 13.0 deployment target, found {versions}: {sys.argv[1]}")
+print(f"{sys.argv[1]}: macOS deployment target 13.0 verified")
