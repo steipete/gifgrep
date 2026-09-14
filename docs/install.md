@@ -51,7 +51,7 @@ gifgrep --version
 gifgrep --help
 ```
 
-If `--version` prints `gifgrep 0.4.2`, you're good. Continue to the [Quickstart](quickstart.md).
+If `--version` prints `gifgrep 0.4.3`, you're good. Continue to the [Quickstart](quickstart.md).
 
 ## API keys (one-time)
 
