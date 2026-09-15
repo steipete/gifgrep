@@ -290,6 +290,7 @@ body:not(.home) .doc>h1:first-child{display:none}
 <p>Extraction uses the complete animation, including frames beyond the TUI&#39;s preview limit. Negative, non-finite, and overflowing timestamps are rejected.</p>
 <h2 id="how-frame-timing-works"><a class="anchor" href="#how-frame-timing-works" aria-label="Anchor link">#</a>How frame timing works</h2>
 <p>GIFs encode per-frame delays (in centiseconds). gifgrep accumulates these deltas to map your <code>--at</code> value onto the closest preceding frame. There&#39;s no resampling — you always get a frame that actually exists in the source.</p>
+<p>Extraction preserves positive source delays, including pauses longer than one second. A zero delay uses the decoder&#39;s 80 ms default.</p>
 <p>For a denser look at the GIF, see <a href="sheet.html"><code>sheet</code></a>.</p>
 <h2 id="writing-to-stdout"><a class="anchor" href="#writing-to-stdout" aria-label="Anchor link">#</a>Writing to stdout</h2>
 <p><code>-o -</code> pipes raw PNG bytes to stdout. Combine with anything that expects PNG on stdin:</p>

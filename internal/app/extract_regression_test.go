@@ -83,3 +83,57 @@ func TestDurationRejectsInvalidNumbers(t *testing.T) {
 		})
 	}
 }
+
+func TestExtractPreservesLongFrameDelays(t *testing.T) {
+	palette := color.Palette{color.RGBA{R: 255, A: 255}, color.RGBA{G: 255, A: 255}, color.RGBA{B: 255, A: 255}, color.White}
+	animation := &gif.GIF{Delay: []int{300, 100, 100, 100}}
+	for i := range palette {
+		frame := image.NewPaletted(image.Rect(0, 0, 1, 1), palette)
+		frame.SetColorIndex(0, 0, uint8(i))
+		animation.Image = append(animation.Image, frame)
+	}
+	var data bytes.Buffer
+	if err := gif.EncodeAll(&data, animation); err != nil {
+		t.Fatal(err)
+	}
+	input := filepath.Join(t.TempDir(), "pauses.gif")
+	if err := os.WriteFile(input, data.Bytes(), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		name  string
+		at    time.Duration
+		sheet bool
+		want  []color.Color
+	}{
+		{name: "during pause", at: 1500 * time.Millisecond, want: []color.Color{palette[0]}},
+		{name: "exact boundary", at: 3 * time.Second, want: []color.Color{palette[1]}},
+		{name: "past end", at: 10 * time.Second, want: []color.Color{palette[3]}},
+		{name: "sheet", sheet: true, want: []color.Color{palette[0], palette[1], palette[3]}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			output := filepath.Join(t.TempDir(), "output.png")
+			opts := model.Options{GifInput: input, OutPath: output, StillSet: !tc.sheet, StillAt: tc.at}
+			if tc.sheet {
+				opts.StillsCount = 3
+				opts.StillsCols = 3
+			}
+			if err := runExtract(opts); err != nil {
+				t.Fatal(err)
+			}
+			raw, err := os.ReadFile(output)
+			if err != nil {
+				t.Fatal(err)
+			}
+			img, err := png.Decode(bytes.NewReader(raw))
+			if err != nil {
+				t.Fatal(err)
+			}
+			for x, want := range tc.want {
+				if got := color.NRGBAModel.Convert(img.At(x, 0)); got != color.NRGBAModel.Convert(want) {
+					t.Errorf("pixel %d = %v, want %v", x, got, want)
+				}
+			}
+		})
+	}
+}

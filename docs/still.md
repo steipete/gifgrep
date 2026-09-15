@@ -44,6 +44,8 @@ Extraction uses the complete animation, including frames beyond the TUI's previe
 
 GIFs encode per-frame delays (in centiseconds). gifgrep accumulates these deltas to map your `--at` value onto the closest preceding frame. There's no resampling — you always get a frame that actually exists in the source.
 
+Extraction preserves positive source delays, including pauses longer than one second. A zero delay uses the decoder's 80 ms default.
+
 For a denser look at the GIF, see [`sheet`](sheet.md).
 
 ## Writing to stdout

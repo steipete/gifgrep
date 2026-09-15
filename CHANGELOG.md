@@ -2,6 +2,8 @@
 
 ## 0.4.4 - Unreleased
 
+- Extraction: preserve long GIF frame delays so `still --at` and contact-sheet sampling select frames from the source timeline.
+
 ## 0.4.3 - 2026-09-14
 
 **Highlights:** macOS downloads are signed and notarized.

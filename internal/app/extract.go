@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"net/url"
 	"os"
@@ -41,6 +42,8 @@ func runExtract(opts model.Options) error {
 	}
 	decodeOpts := gifdecode.DefaultOptions()
 	decodeOpts.MaxFrames = -1
+	// Extraction follows source timestamps, not the preview playback delay cap.
+	decodeOpts.MaxDelay = time.Duration(math.MaxInt64)
 	decoded, err := gifdecode.Decode(data, decodeOpts)
 	if err != nil {
 		return err
