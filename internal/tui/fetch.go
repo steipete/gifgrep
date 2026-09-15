@@ -2,9 +2,10 @@ package tui
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"time"
+
+	"github.com/steipete/gifgrep/internal/imageinput"
 )
 
 func fetchGIF(gifURL string) ([]byte, error) {
@@ -24,9 +25,5 @@ func fetchGIF(gifURL string) ([]byte, error) {
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("http %d", resp.StatusCode)
 	}
-	raw, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return raw, nil
+	return imageinput.Read(resp.Body)
 }

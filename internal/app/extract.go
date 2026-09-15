@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"io"
 	"math"
 	"net/http"
 	"net/url"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"github.com/steipete/gifgrep/gifdecode"
+	"github.com/steipete/gifgrep/internal/imageinput"
 	"github.com/steipete/gifgrep/internal/model"
 	"github.com/steipete/gifgrep/internal/stills"
 )
@@ -93,9 +93,9 @@ func readInput(input string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		return os.ReadFile(parsed.Path)
+		return imageinput.ReadFile(parsed.Path)
 	}
-	return os.ReadFile(input)
+	return imageinput.ReadFile(input)
 }
 
 func fetchURL(rawURL string) ([]byte, error) {
@@ -115,7 +115,7 @@ func fetchURL(rawURL string) ([]byte, error) {
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("http %d", resp.StatusCode)
 	}
-	return io.ReadAll(resp.Body)
+	return imageinput.Read(resp.Body)
 }
 
 func writeOutput(path string, data []byte) error {

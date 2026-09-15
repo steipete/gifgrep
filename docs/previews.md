@@ -18,6 +18,8 @@ description: "How gifgrep renders animated GIFs inline in Kitty, Ghostty, and iT
 
 The CLI never outputs image bytes when stdout is a pipe — only on a TTY.
 
+CLI thumbnails and TUI previews buffer at most 20 MiB of encoded image data. Oversized local files and HTTP responses are rejected while reading, including iTerm2 previews sent as raw GIF bytes. Explicit downloads can still save larger files to disk.
+
 ## Kitty graphics
 
 Used by Kitty and Ghostty. The escape envelope:

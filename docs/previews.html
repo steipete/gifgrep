@@ -270,6 +270,7 @@ body:not(.home) .doc>h1:first-child{display:none}
 <p><code>gifgrep</code> renders GIFs using the graphics protocol supported by your terminal.</p>
 <table><thead><tr><th>Terminal</th><th>Protocol</th><th>TUI animation</th><th>CLI <code>--thumbs</code></th></tr></thead><tbody><tr><td>Kitty</td><td>Kitty graphics</td><td>Native, hardware</td><td>Still frame</td></tr><tr><td>Ghostty</td><td>Kitty graphics</td><td>Software (frame ticks)</td><td>Still frame</td></tr><tr><td>iTerm2</td><td>OSC 1337 (Inline Images)</td><td>Native (raw GIF)</td><td>Animated thumb</td></tr><tr><td>WezTerm / Windows Terminal</td><td>Sixel</td><td>Software (frame ticks)</td><td>Still frame</td></tr><tr><td>Truecolor (forced)</td><td>ANSI half-blocks</td><td>Software (frame ticks)</td><td>No thumbs</td></tr><tr><td>Apple Terminal</td><td>None detected</td><td>Refuses to start unless forced</td><td>No thumbs</td></tr></tbody></table>
 <p>The CLI never outputs image bytes when stdout is a pipe — only on a TTY.</p>
+<p>CLI thumbnails and TUI previews buffer at most 20 MiB of encoded image data. Oversized local files and HTTP responses are rejected while reading, including iTerm2 previews sent as raw GIF bytes. Explicit downloads can still save larger files to disk.</p>
 <h2 id="kitty-graphics"><a class="anchor" href="#kitty-graphics" aria-label="Anchor link">#</a>Kitty graphics</h2>
 <p>Used by Kitty and Ghostty. The escape envelope:</p>
 <pre><code class="language-text">ESC _G &lt;key=value;...&gt; ; &lt;base64 payload&gt; ESC \</code></pre>

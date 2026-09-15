@@ -40,6 +40,8 @@ Sampling preserves positive source delays, including pauses longer than one seco
 
 Output is limited to 40 million pixels. Dimensions or padding that overflow or exceed that budget return an error before allocating the sheet.
 
+Encoded input is limited to 20 MiB. Local files and HTTP responses are checked while reading, including responses without a content length.
+
 ## Writing to stdout
 
 ```bash

@@ -40,6 +40,8 @@ gifgrep still cat.gif --at 0 -o cover.png --reveal
 
 Extraction uses the complete animation, including frames beyond the TUI's preview limit. Negative, non-finite, and overflowing timestamps are rejected.
 
+Encoded input is limited to 20 MiB. Local files and HTTP responses are checked while reading, including responses without a content length.
+
 ## How frame timing works
 
 GIFs encode per-frame delays (in centiseconds). gifgrep accumulates these deltas to map your `--at` value onto the closest preceding frame. There's no resampling — you always get a frame that actually exists in the source.

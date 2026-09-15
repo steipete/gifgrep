@@ -2,10 +2,10 @@ package tui
 
 import (
 	"encoding/binary"
-	"os"
 	"time"
 
 	"github.com/steipete/gifgrep/gifdecode"
+	"github.com/steipete/gifgrep/internal/imageinput"
 	"github.com/steipete/gifgrep/internal/termcaps"
 )
 
@@ -51,7 +51,7 @@ func loadSelectedImage(state *appState) {
 		var data []byte
 		var err error
 		if localOK {
-			data, err = os.ReadFile(localPath)
+			data, err = imageinput.ReadFile(localPath)
 		} else {
 			data, err = fetchGIF(source)
 		}
