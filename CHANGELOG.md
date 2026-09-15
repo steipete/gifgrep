@@ -4,6 +4,7 @@
 
 - Extraction: preserve long GIF frame delays so `still --at` and contact-sheet sampling select frames from the source timeline.
 - Images: enforce the 20 MiB input limit while reading extraction inputs and previews, preventing oversized files or streaming responses from being buffered without a bound.
+- Terminal output: show control characters in provider text, URLs, and TUI fields as visible escapes, preventing terminal-command injection while preserving raw JSON fields.
 
 ## 0.4.3 - 2026-09-14
 

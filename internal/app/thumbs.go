@@ -14,6 +14,7 @@ import (
 	"github.com/steipete/gifgrep/internal/model"
 	"github.com/steipete/gifgrep/internal/sixel"
 	"github.com/steipete/gifgrep/internal/termcaps"
+	"github.com/steipete/gifgrep/internal/termtext"
 )
 
 type thumbsMode string
@@ -82,7 +83,7 @@ func renderPlain(
 	withThumbs := thumbs != termcaps.InlineNone
 	for i, res := range results {
 		title := normalizeTitle(res)
-		url := res.URL
+		url := termtext.Escape(res.URL)
 
 		nPrefix := ""
 		if opts.Number {

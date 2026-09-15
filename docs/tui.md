@@ -5,6 +5,8 @@ description: "Interactive arrow-key GIF browser with animated inline previews in
 
 # `gifgrep tui`
 
+Provider titles, search text, and status messages display control characters as visible escapes. Only gifgrep's own rendering can issue terminal commands.
+
 The TUI is a small, opinionated terminal UI for browsing GIFs with **animated inline previews**.
 
 ```text

@@ -9,6 +9,7 @@ import (
 
 	"github.com/steipete/gifgrep/internal/model"
 	"github.com/steipete/gifgrep/internal/termcaps"
+	"github.com/steipete/gifgrep/internal/termtext"
 	"golang.org/x/term"
 )
 
@@ -54,7 +55,7 @@ func normalizeTitle(res model.Result) string {
 	if label == "" {
 		label = "untitled"
 	}
-	return label
+	return termtext.Escape(label)
 }
 
 func writeSearchResults(out *bufio.Writer, opts model.Options, useColor bool, thumbs termcaps.InlineProtocol, results []model.Result, termCols int, format outputFormat) {
@@ -64,7 +65,7 @@ func writeSearchResults(out *bufio.Writer, opts model.Options, useColor bool, th
 		return
 	case formatURL:
 		for i, res := range results {
-			url := res.URL
+			url := termtext.Escape(res.URL)
 			if opts.Number {
 				_, _ = fmt.Fprintf(out, "%d\t%s\n", i+1, url)
 				continue
@@ -75,7 +76,7 @@ func writeSearchResults(out *bufio.Writer, opts model.Options, useColor bool, th
 	case formatMD:
 		for i, res := range results {
 			title := normalizeTitle(res)
-			url := res.URL
+			url := termtext.Escape(res.URL)
 			prefix := "- "
 			if opts.Number {
 				prefix = fmt.Sprintf("%d. ", i+1)
@@ -86,7 +87,7 @@ func writeSearchResults(out *bufio.Writer, opts model.Options, useColor bool, th
 	case formatComment:
 		for i, res := range results {
 			title := normalizeTitle(res)
-			url := res.URL
+			url := termtext.Escape(res.URL)
 			if opts.Number {
 				_, _ = fmt.Fprintf(out, "%d\t%s  # %s\n", i+1, url, title)
 				continue
@@ -102,7 +103,7 @@ func writeSearchResults(out *bufio.Writer, opts model.Options, useColor bool, th
 	default:
 		for i, res := range results {
 			title := normalizeTitle(res)
-			url := res.URL
+			url := termtext.Escape(res.URL)
 			if useColor {
 				title = "\x1b[1m" + title + "\x1b[0m"
 				url = "\x1b[36m" + url + "\x1b[0m"

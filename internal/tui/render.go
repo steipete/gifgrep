@@ -12,6 +12,7 @@ import (
 	"github.com/steipete/gifgrep/internal/model"
 	"github.com/steipete/gifgrep/internal/search"
 	"github.com/steipete/gifgrep/internal/termcaps"
+	"github.com/steipete/gifgrep/internal/termtext"
 )
 
 const giphyAttributionImageID uint32 = 0x67697068 // "giph"
@@ -92,7 +93,7 @@ func drawHeader(out *bufio.Writer, useColor bool, cols int, tagline string) {
 		// Likely an action flash; make it pop a bit.
 		codes = []string{"\x1b[33m"}
 	}
-	header += styleIf(useColor, " — "+tagline, codes...)
+	header += styleIf(useColor, " — "+termtext.Escape(tagline), codes...)
 	writeLineAt(out, 1, 1, header, cols)
 }
 
@@ -119,6 +120,7 @@ func drawList(out *bufio.Writer, state *appState, layout layout) {
 			if label == "" {
 				label = item.ID
 			}
+			label = termtext.Escape(label)
 			prefix := "  "
 			if idx == state.selected {
 				prefix = styleIf(state.useColor, "> ", "\x1b[1m", "\x1b[36m")
@@ -190,6 +192,7 @@ func drawStatus(out *bufio.Writer, state *appState, layout layout) {
 }
 
 func formatStatusLine(useColor bool, status string) string {
+	status = termtext.Escape(status)
 	if !useColor {
 		return status
 	}
@@ -211,7 +214,7 @@ func drawSearch(out *bufio.Writer, state *appState, layout layout) {
 		label = "Search KLIPY"
 	}
 	pill := "[" + label + "]"
-	query := state.query
+	query := termtext.Escape(state.query)
 	if state.useColor {
 		bg := "\x1b[48;5;236m"
 		if state.mode == modeQuery {

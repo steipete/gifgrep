@@ -5,6 +5,8 @@ description: "gifgrep search — pipe-friendly GIF search from your terminal."
 
 # `gifgrep search`
 
+Text output displays control characters in result titles and URLs as visible escapes (for example, `\x1b`) so provider data cannot issue terminal commands. JSON retains the original field values using JSON escaping.
+
 Search a provider for GIFs and print results. This is what `gifgrep <query>` runs by default.
 
 ```text
