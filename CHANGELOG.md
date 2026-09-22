@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.4.5 - Unreleased
+
 ## 0.4.4 - 2026-09-22
 
 **Highlights:** Safer terminal output and bounded image reads, with frame extraction that follows the original GIF timeline.
