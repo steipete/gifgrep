@@ -268,6 +268,7 @@ body:not(.home) .doc>h1:first-child{display:none}
       <div class="doc-grid">
         <article class="doc"><h1 id="commands">Commands</h1>
 <p>Every subcommand has its own page. The CLI itself is <code>gifgrep --help</code>.</p>
+<p>Error messages go to stderr and display control characters in arguments, filenames, and underlying errors as visible escapes so they cannot issue terminal commands.</p>
 <h2 id="top-level"><a class="anchor" href="#top-level" aria-label="Anchor link">#</a>Top-level</h2>
 <pre><code class="language-text">gifgrep &lt;command&gt; [flags]</code></pre>
 <table><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody><tr><td><a href="search.html"><code>gifgrep search</code></a></td><td>Search a provider; print URLs, JSON, or markdown.</td></tr><tr><td><a href="tui.html"><code>gifgrep tui</code></a></td><td>Interactive browser with inline animated previews.</td></tr><tr><td><a href="still.html"><code>gifgrep still</code></a></td><td>Extract one frame from a GIF as PNG.</td></tr><tr><td><a href="sheet.html"><code>gifgrep sheet</code></a></td><td>Generate a contact-sheet PNG of N frames.</td></tr></tbody></table>

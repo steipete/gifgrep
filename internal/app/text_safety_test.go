@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -57,4 +59,43 @@ func TestSearchJSONPreservesProviderText(t *testing.T) {
 			t.Fatalf("JSON changed provider fields: %+v", results)
 		}
 	})
+}
+
+func TestRunErrorsDoNotEmitControls(t *testing.T) {
+	payload := "Café\x1b]52;c;c3ludGhldGlj\a\u009b31m\nforged"
+	for _, tc := range []struct {
+		name string
+		args []string
+		code int
+	}{
+		{name: "missing input", args: []string{"still", filepath.Join(t.TempDir(), payload), "--at", "0"}, code: 1},
+		{name: "invalid flag", args: []string{"search", "--" + payload}, code: 2},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			stderr, err := os.CreateTemp(t.TempDir(), "stderr")
+			if err != nil {
+				t.Fatal(err)
+			}
+			original := os.Stderr
+			os.Stderr = stderr
+			t.Cleanup(func() {
+				os.Stderr = original
+				_ = stderr.Close()
+			})
+			if code := Run(tc.args); code != tc.code {
+				t.Fatalf("exit code = %d, want %d", code, tc.code)
+			}
+			output, err := os.ReadFile(stderr.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := string(output)
+			if strings.ContainsAny(got, "\x1b\a\u009b") || strings.Contains(got, "\nforged") {
+				t.Fatalf("unsafe diagnostic controls in %q", got)
+			}
+			if !strings.Contains(got, "Café") || !strings.Contains(got, `\x1b`) {
+				t.Fatalf("diagnostic lost escaped input: %q", got)
+			}
+		})
+	}
 }
