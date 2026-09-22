@@ -5,7 +5,7 @@ description: "Ship signed and notarized gifgrep binaries with the shared release
 
 # Releasing
 
-The `Release` workflow calls the Go CLI archetype from `openclaw/release-workflows`, pinned to v1.9.0 (`f613cbfed2b043159c850c353e7facb8c89833b0`). Its `personal` policy requires **Developer ID Application: Peter Steinberger (Y5PE65HELJ)** and the identifier `com.steipete.gifgrep.gifgrep`.
+The `Release` workflow calls the Go CLI archetype from `openclaw/release-workflows`, pinned to v1.10.0 (`d22bcb545b8e43b51fb332be6bcd97b5e7d40234`). Its `personal` policy requires **Developer ID Application: Peter Steinberger (Y5PE65HELJ)** and the identifier `com.steipete.gifgrep.gifgrep`.
 
 ## Prepare
 
