@@ -267,7 +267,7 @@ body:not(.home) .doc>h1:first-child{display:none}
       </header>
       <div class="doc-grid">
         <article class="doc"><h1 id="releasing">Releasing</h1>
-<p>The <code>Release</code> workflow calls the Go CLI archetype from <code>openclaw/release-workflows</code>, pinned to v1.9.0 (<code>f613cbfed2b043159c850c353e7facb8c89833b0</code>). Its <code>personal</code> policy requires <strong>Developer ID Application: Peter Steinberger (Y5PE65HELJ)</strong> and the identifier <code>com.steipete.gifgrep.gifgrep</code>.</p>
+<p>The <code>Release</code> workflow calls the Go CLI archetype from <code>openclaw/release-workflows</code>, pinned to v1.10.0 (<code>d22bcb545b8e43b51fb332be6bcd97b5e7d40234</code>). Its <code>personal</code> policy requires <strong>Developer ID Application: Peter Steinberger (Y5PE65HELJ)</strong> and the identifier <code>com.steipete.gifgrep.gifgrep</code>.</p>
 <h2 id="prepare"><a class="anchor" href="#prepare" aria-label="Anchor link">#</a>Prepare</h2>
 <p>Merge the release changes through a reviewed PR with green CI. Finalize the versioned <code>Unreleased</code> changelog section with its date and highlights. Update <code>internal/model/types.go</code>, <code>package.json</code>, <code>package-lock.json</code>, and the installation version example, then regenerate the docs with <code>make docs-site</code>.</p>
 <p>Run the local gate on macOS:</p>
