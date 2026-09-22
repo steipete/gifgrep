@@ -7,6 +7,8 @@ description: "Every gifgrep subcommand at a glance."
 
 Every subcommand has its own page. The CLI itself is `gifgrep --help`.
 
+Error messages go to stderr and display control characters in arguments, filenames, and underlying errors as visible escapes so they cannot issue terminal commands.
+
 ## Top-level
 
 ```text

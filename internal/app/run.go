@@ -8,6 +8,7 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/steipete/gifgrep/internal/model"
+	"github.com/steipete/gifgrep/internal/termtext"
 )
 
 type exitPanic struct {
@@ -33,7 +34,7 @@ func Run(args []string) int {
 		}),
 	)
 	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err.Error())
+		_, _ = fmt.Fprintln(os.Stderr, termtext.Escape(err.Error()))
 		return 1
 	}
 
@@ -53,7 +54,7 @@ func Run(args []string) int {
 		if errors.As(err, &parseErr) {
 			_ = parseErr.Context.PrintUsage(true)
 		}
-		_, _ = fmt.Fprintln(os.Stderr, err.Error())
+		_, _ = fmt.Fprintln(os.Stderr, termtext.Escape(err.Error()))
 		return 2
 	}
 	if ctx == nil {
@@ -61,7 +62,7 @@ func Run(args []string) int {
 	}
 
 	if err := ctx.Run(); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err.Error())
+		_, _ = fmt.Fprintln(os.Stderr, termtext.Escape(err.Error()))
 		return 1
 	}
 	return 0
