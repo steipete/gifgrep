@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.4.6 - Unreleased
+## 0.4.6 - 2026-10-23
+
+**Highlights:** Security hardening bounds GIF preview decoding before frame allocation to prevent memory exhaustion from crafted GIFs.
 
 - Decoding: enforce preview frame caps before allocating GIF frames, including malformed tails, while preserving complete-animation extraction. Thanks @SebTardif (#40).
 
